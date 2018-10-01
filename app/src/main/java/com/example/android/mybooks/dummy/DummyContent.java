@@ -23,6 +23,7 @@ public class DummyContent {
      */
     public static final Map<String, DummyItem> ITEM_MAP = new HashMap<String, DummyItem>();
 
+/*
     private static final int COUNT = 25;
 
     static {
@@ -31,12 +32,19 @@ public class DummyContent {
             addItem(createDummyItem(i));
         }
     }
+*/
+    static {
+        addItem(new DummyItem("1","titulo1","autor1","fecha1","descripcion1","url1"));
+        addItem(new DummyItem("2","titulo2","autor2","fecha2","descripcion2","url2"));
+        addItem(new DummyItem("3","titulo3","autor3","fecha3","descripcion3","url3"));
+    }
 
     private static void addItem(DummyItem item) {
         ITEMS.add(item);
-        ITEM_MAP.put(item.id, item);
+        ITEM_MAP.put(item.getIdentificador(), item);
     }
 
+/*
     private static DummyItem createDummyItem(int position) {
         return new DummyItem(String.valueOf(position), "Item " + position, makeDetails(position));
     }
@@ -49,24 +57,55 @@ public class DummyContent {
         }
         return builder.toString();
     }
+*/
 
     /**
      * A dummy item representing a piece of content.
      */
     public static class DummyItem {
-        public final String id;
-        public final String content;
-        public final String details;
+        private final String mIdentificador;
+        private final String mTitulo;
+        private final String mAutor;
+        private final String mFechaPublicacion;
+        private final String mDescripcion;
+        private final String mURLImagenPortada;
 
-        public DummyItem(String id, String content, String details) {
-            this.id = id;
-            this.content = content;
-            this.details = details;
+        public DummyItem(String id, String tit, String aut, String fecha, String desc, String URL) {
+            this.mIdentificador = id;
+            this.mTitulo = tit;
+            this.mAutor = aut;
+            this.mFechaPublicacion = fecha;
+            this.mDescripcion = desc;
+            this.mURLImagenPortada = URL;
+        }
+
+        public String getIdentificador(){
+            return mIdentificador;
+        }
+
+        public String getTitulo(){
+            return mTitulo;
+        }
+
+        public String getAutor(){
+            return mAutor;
+        }
+
+        public String getFechaPublicacion(){
+            return mFechaPublicacion;
+        }
+
+        public String getDescripcion(){
+            return mDescripcion;
+        }
+
+        public String getURLImagenPortada(){
+            return mURLImagenPortada;
         }
 
         @Override
         public String toString() {
-            return content;
+            return mTitulo + " escrito por " + mAutor;
         }
     }
 }
