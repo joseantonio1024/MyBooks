@@ -14,7 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.example.android.mybooks.dummy.DummyContent;
+import com.example.android.mybooks.model.DummyContent;
 
 import java.util.List;
 
@@ -25,9 +25,7 @@ import java.util.List;
  */
 public class BookListActivity extends AppCompatActivity {
 
-    /**
-     * Whether or not the activity is in two-pane mode, i.e. running on a tablet device.
-     */
+    /** Whether or not the activity is in two-pane mode, i.e. running on a tablet device. */
     private boolean mTwoPane;
 
     @Override
@@ -66,29 +64,29 @@ public class BookListActivity extends AppCompatActivity {
     public static class SimpleItemRecyclerViewAdapter extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
 
         private final BookListActivity mParentActivity;
-        private final List<DummyContent.DummyItem> mValues;
+        private final List<DummyContent.BookItem> mValues;
         private final boolean mTwoPane;
         private final View.OnClickListener mOnClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                DummyContent.DummyItem item = (DummyContent.DummyItem) view.getTag();
+                DummyContent.BookItem item = (DummyContent.BookItem) view.getTag();
                 if (mTwoPane) {
                     Bundle arguments = new Bundle();
-                    arguments.putString(BookDetailFragment.ARG_ITEM_ID, item.getIdentificador());
+                    arguments.putString(BookDetailFragment.ARG_ITEM_ID, String.valueOf(item.identificador));
                     BookDetailFragment fragment = new BookDetailFragment();
                     fragment.setArguments(arguments);
                     mParentActivity.getSupportFragmentManager().beginTransaction().replace(R.id.book_detail_container, fragment).commit();
                 } else {
                     Context context = view.getContext();
                     Intent intent = new Intent(context, BookDetailActivity.class);
-                    intent.putExtra(BookDetailFragment.ARG_ITEM_ID, item.getIdentificador());
+                    intent.putExtra(BookDetailFragment.ARG_ITEM_ID, String.valueOf(item.identificador));
 
                     context.startActivity(intent);
                 }
             }
         };
 
-        SimpleItemRecyclerViewAdapter(BookListActivity parent, List<DummyContent.DummyItem> items, boolean twoPane) {
+        SimpleItemRecyclerViewAdapter(BookListActivity parent, List<DummyContent.BookItem> items, boolean twoPane) {
             mValues = items;
             mParentActivity = parent;
             mTwoPane = twoPane;
@@ -102,8 +100,8 @@ public class BookListActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
-            holder.mTituloView.setText(mValues.get(position).getTitulo());
-            holder.mAutorView.setText(mValues.get(position).getAutor());
+            holder.mTituloView.setText(mValues.get(position).titulo);
+            holder.mAutorView.setText(mValues.get(position).autor);
 
             holder.itemView.setTag(mValues.get(position));
             holder.itemView.setOnClickListener(mOnClickListener);

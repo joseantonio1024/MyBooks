@@ -8,7 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import com.example.android.mybooks.dummy.DummyContent;
+import com.example.android.mybooks.model.DummyContent;
 
 /**
  * A fragment representing a single Book detail screen. This fragment is either contained in a {@link BookListActivity}
@@ -23,7 +23,7 @@ public class BookDetailFragment extends Fragment {
     /**
      * The dummy content this fragment is presenting.
      */
-    private DummyContent.DummyItem mItem;
+    private DummyContent.BookItem mItem;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -44,7 +44,7 @@ public class BookDetailFragment extends Fragment {
             Activity activity = this.getActivity();
             CollapsingToolbarLayout appBarLayout = activity.findViewById(R.id.toolbar_layout);
             if (appBarLayout != null) {
-                appBarLayout.setTitle(mItem.getTitulo());
+                appBarLayout.setTitle(mItem.titulo);
             }
         }
     }
@@ -55,10 +55,10 @@ public class BookDetailFragment extends Fragment {
 
         // Show the dummy content as text in a TextView.
         if (mItem != null) {
-            ((TextView) rootView.findViewById(R.id.tv_autor)).setText(mItem.getAutor());
-            ((TextView) rootView.findViewById(R.id.tv_fecha)).setText(mItem.getFechaPublicacion());
-            ((TextView) rootView.findViewById(R.id.tv_descripcion)).setText(mItem.getDescripcion());
-            ((TextView) rootView.findViewById(R.id.tv_url_imagen)).setText(mItem.getURLImagenPortada());
+            ((TextView) rootView.findViewById(R.id.tv_autor)).setText(mItem.autor);
+            ((TextView) rootView.findViewById(R.id.tv_fecha)).setText(mItem.fechaPublicacion);
+            ((TextView) rootView.findViewById(R.id.tv_descripcion)).setText(mItem.descripcion);
+            ((TextView) rootView.findViewById(R.id.tv_url_imagen)).setText(mItem.URLImagenPortada);
         }
 
         return rootView;
