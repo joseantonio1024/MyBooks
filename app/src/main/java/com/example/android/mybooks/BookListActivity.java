@@ -49,10 +49,8 @@ public class BookListActivity extends AppCompatActivity {
         });
 
         if (findViewById(R.id.book_detail_container) != null) {
-            // The detail container view will be present only in the
-            // large-screen layouts (res/values-w900dp).
-            // If this view is present, then the
-            // activity should be in two-pane mode.
+            // The detail container view will be present only in the large-screen layouts (res/values-w900dp).
+            // If this view is present, then the activity should be in two-pane mode.
             mTwoPane = true;
         }
 
@@ -79,8 +77,7 @@ public class BookListActivity extends AppCompatActivity {
                     arguments.putString(BookDetailFragment.ARG_ITEM_ID, item.getIdentificador());
                     BookDetailFragment fragment = new BookDetailFragment();
                     fragment.setArguments(arguments);
-                    mParentActivity.getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.book_detail_container, fragment).commit();
+                    mParentActivity.getSupportFragmentManager().beginTransaction().replace(R.id.book_detail_container, fragment).commit();
                 } else {
                     Context context = view.getContext();
                     Intent intent = new Intent(context, BookDetailActivity.class);
@@ -105,8 +102,8 @@ public class BookListActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
-            holder.mIdView.setText(mValues.get(position).getIdentificador());
-            holder.mContentView.setText(mValues.get(position).getTitulo());
+            holder.mTituloView.setText(mValues.get(position).getTitulo());
+            holder.mAutorView.setText(mValues.get(position).getAutor());
 
             holder.itemView.setTag(mValues.get(position));
             holder.itemView.setOnClickListener(mOnClickListener);
@@ -118,13 +115,13 @@ public class BookListActivity extends AppCompatActivity {
         }
 
         class ViewHolder extends RecyclerView.ViewHolder {
-            final TextView mIdView;
-            final TextView mContentView;
+            final TextView mTituloView;
+            final TextView mAutorView;
 
             ViewHolder(View view) {
                 super(view);
-                mIdView = view.findViewById(R.id.id_text);
-                mContentView = view.findViewById(R.id.content);
+                mTituloView = view.findViewById(R.id.book_list_content_tv_titulo);
+                mAutorView = view.findViewById(R.id.book_list_content_tv_autor);
             }
         }
     }
