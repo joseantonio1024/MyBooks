@@ -24,6 +24,7 @@ public class DummyContent {
         addItem(new BookItem(1,"titulo1","autor1","fecha1","descripcion1","url1"));
         addItem(new BookItem(2,"titulo2","autor2","fecha2","descripcion2","url2"));
         addItem(new BookItem(3,"titulo3","autor3","fecha3","descripcion3","url3"));
+        addItem(new BookItem(4,"titulo4","autor4","fecha4","descripcion4","url4"));
     }
 
     private static void addItem(BookItem item) {

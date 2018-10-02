@@ -66,6 +66,8 @@ public class BookListActivity extends AppCompatActivity {
         private final BookListActivity mParentActivity;
         private final List<DummyContent.BookItem> mValues;
         private final boolean mTwoPane;
+        private static final int LAYOUT_PAR = 0;
+        private static final int LAYOUT_IMPAR = 1;
         private final View.OnClickListener mOnClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -93,8 +95,21 @@ public class BookListActivity extends AppCompatActivity {
         }
 
         @Override
+        public int getItemViewType(int position){
+            if(position%2 == 0)
+                return LAYOUT_PAR;
+            else
+                return LAYOUT_IMPAR;
+        }
+
+        @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.book_list_content, parent, false);
+            View view;
+            if(viewType == LAYOUT_PAR) {
+                view = LayoutInflater.from(parent.getContext()).inflate(R.layout.book_list_content_impares, parent, false);
+            }else {
+                view = LayoutInflater.from(parent.getContext()).inflate(R.layout.book_list_content_pares, parent, false);
+            }
             return new ViewHolder(view);
         }
 
