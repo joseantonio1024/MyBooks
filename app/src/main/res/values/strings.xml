@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">My Books</string>
     <string name="title_book_detail">Book Detail</string>
+    <string name="portada_del_libro">portada del libro</string>
 </resources>

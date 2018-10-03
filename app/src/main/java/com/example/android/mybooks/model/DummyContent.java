@@ -21,10 +21,10 @@ public class DummyContent {
     public static final Map<String, BookItem> ITEM_MAP = new HashMap<String, BookItem>();
 
     static {
-        addItem(new BookItem(1,"titulo1","autor1","fecha1","descripcion1","url1"));
-        addItem(new BookItem(2,"titulo2","autor2","fecha2","descripcion2","url2"));
-        addItem(new BookItem(3,"titulo3","autor3","fecha3","descripcion3","url3"));
-        addItem(new BookItem(4,"titulo4","autor4","fecha4","descripcion4","url4"));
+        addItem(new BookItem(1,"Título 1","Autor 1","30/06/1952","Descripción 1","url 1"));
+        addItem(new BookItem(2,"Título 2","Autor 2","26/12/2010","Descripción 2","url 2"));
+        addItem(new BookItem(3,"Título 3","Autor 3","14/05/2001","Descripción 3","url 3"));
+        addItem(new BookItem(4,"Título 4","Autor 4","08/11/2000","Descripción 4","url 4"));
     }
 
     private static void addItem(BookItem item) {
@@ -33,7 +33,7 @@ public class DummyContent {
     }
 
     /**
-     * A book item representing a piece of content.
+     * Esta clase representa un libro.
      */
     public static class BookItem {
         public final int identificador;
@@ -43,12 +43,12 @@ public class DummyContent {
         public final String descripcion;
         public final String URLImagenPortada;
 
-        public BookItem(int id, String tit, String aut, String fecha, String desc, String URL) {
+        public BookItem(int id, String titulo, String autor, String fecha, String descripcion, String URL) {
             this.identificador = id;
-            this.titulo = tit;
-            this.autor = aut;
+            this.titulo = titulo;
+            this.autor = autor;
             this.fechaPublicacion = fecha;
-            this.descripcion = desc;
+            this.descripcion = descripcion;
             this.URLImagenPortada = URL;
         }
 

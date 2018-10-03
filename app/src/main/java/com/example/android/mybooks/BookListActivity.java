@@ -66,8 +66,11 @@ public class BookListActivity extends AppCompatActivity {
         private final BookListActivity mParentActivity;
         private final List<DummyContent.BookItem> mValues;
         private final boolean mTwoPane;
+
+        // constantes utilizadas para alternar colores en la lista de libros
         private static final int LAYOUT_PAR = 0;
         private static final int LAYOUT_IMPAR = 1;
+
         private final View.OnClickListener mOnClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -94,6 +97,8 @@ public class BookListActivity extends AppCompatActivity {
             mTwoPane = twoPane;
         }
 
+        // Se necesita sobreescribir este método para acceder a la posición actual del libro en la lista.
+        // De esta forma podemos identificar si la posición es par o impar.
         @Override
         public int getItemViewType(int position){
             if(position%2 == 0)
@@ -105,6 +110,7 @@ public class BookListActivity extends AppCompatActivity {
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View view;
+            // Se infla un layout diferente en función de si es par o impar.
             if(viewType == LAYOUT_PAR) {
                 view = LayoutInflater.from(parent.getContext()).inflate(R.layout.book_list_content_impares, parent, false);
             }else {

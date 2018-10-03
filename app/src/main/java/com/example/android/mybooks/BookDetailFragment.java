@@ -53,12 +53,12 @@ public class BookDetailFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.book_detail, container, false);
 
-        // Show the dummy content as text in a TextView.
+        // Se muestran los datos de un libro. La imagen de portada, de momento es una imagen estática.
         if (mItem != null) {
             ((TextView) rootView.findViewById(R.id.tv_autor)).setText(mItem.autor);
             ((TextView) rootView.findViewById(R.id.tv_fecha)).setText(mItem.fechaPublicacion);
             ((TextView) rootView.findViewById(R.id.tv_descripcion)).setText(mItem.descripcion);
-            ((TextView) rootView.findViewById(R.id.tv_url_imagen)).setText(mItem.URLImagenPortada);
+            //((TextView) rootView.findViewById(R.id.tv_url_imagen)).setText(mItem.URLImagenPortada);
         }
 
         return rootView;
