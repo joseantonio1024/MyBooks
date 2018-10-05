@@ -10,14 +10,11 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import com.example.android.mybooks.model.DummyContent;
-
 import java.util.List;
 
 /**
@@ -54,28 +51,29 @@ public class BookListActivity extends AppCompatActivity {
             mTwoPane = true;
         }
 
+        // Buscamos el recyclerView en el layout.
         View recyclerView = findViewById(R.id.book_list);
         assert recyclerView != null;
         // Añadimos el LayoutManager aquí en vez de en book_list.xml
         ((RecyclerView) recyclerView).setLayoutManager(new LinearLayoutManager(this));
+        // Creamos el adapter y le pasamos los datos de ejemplo.
         SimpleItemRecyclerViewAdapter adapter = new SimpleItemRecyclerViewAdapter(this,DummyContent.ITEMS,mTwoPane);
+        // Unimos el adapter al recyclerView para ingresar los datos
         ((RecyclerView) recyclerView).setAdapter(adapter);
         adapter.notifyDataSetChanged();
-
     }
 
 
 
-
-
-
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Crea el adaptador que extiende de RecyblerView.Adapter
     public static class SimpleItemRecyclerViewAdapter extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
 
         private final BookListActivity mParentActivity;
         private final List<DummyContent.BookItem> mValues;
         private final boolean mTwoPane;
 
-        // constantes utilizadas para alternar colores en la lista de libros
+        // constantes utilizadas para alternar los colores de las cardViews
         private static final int LAYOUT_PAR = 0;
         private static final int LAYOUT_IMPAR = 1;
 
@@ -115,10 +113,11 @@ public class BookListActivity extends AppCompatActivity {
                 return LAYOUT_IMPAR;
         }
 
+        // Normalmente infla un layout de XML y retorna un holder.
         @Override @NonNull
-        public ViewHolder onCreateViewHolder (ViewGroup parent, int viewType) {
+        public ViewHolder onCreateViewHolder (@NonNull ViewGroup parent, int viewType) {
             View view;
-            Log.w("onCreateViewHolder",parent.toString());
+
             // Se infla un layout diferente en función de si es par o impar.
             if(viewType == LAYOUT_PAR) {
                 view = LayoutInflater.from(parent.getContext()).inflate(R.layout.book_list_content_pares, parent, false);
@@ -128,8 +127,9 @@ public class BookListActivity extends AppCompatActivity {
             return new ViewHolder(view);
         }
 
+        // ingresa los datos en el item a través del holder.
         @Override
-        public void onBindViewHolder(final ViewHolder holder, int position) {
+        public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
             holder.mTituloView.setText(mValues.get(position).titulo);
             holder.mAutorView.setText(mValues.get(position).autor);
 
@@ -137,6 +137,7 @@ public class BookListActivity extends AppCompatActivity {
             holder.itemView.setOnClickListener(mOnClickListener);
         }
 
+        // Retorna el número total de ítems de la lista.
         @Override
         public int getItemCount() {
             return mValues.size();
@@ -144,7 +145,9 @@ public class BookListActivity extends AppCompatActivity {
 
 
 
-
+        //////////////////////////////////////////////////
+        // Proporciona una referencia a cada una de las views dentro de un item.
+        // Se utiliza como cache de las views para acceso más rápido.
         class ViewHolder extends RecyclerView.ViewHolder {
             final TextView mTituloView;
             final TextView mAutorView;
@@ -154,6 +157,6 @@ public class BookListActivity extends AppCompatActivity {
                 mTituloView = view.findViewById(R.id.book_list_content_tv_titulo);
                 mAutorView = view.findViewById(R.id.book_list_content_tv_autor);
             }
-        }
-    }
-}
+        }//End class ViewHolder
+    }//End class SimpleItemRecyclerViewAdapter
+}//End class BookListActivity

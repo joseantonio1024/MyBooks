@@ -1,7 +1,6 @@
 package com.example.android.mybooks.model;
 
-import android.util.Log;
-
+import android.support.annotation.NonNull;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -25,6 +24,7 @@ public class DummyContent {
      */
     public static final Map<String, BookItem> ITEM_MAP = new HashMap<String, BookItem>();
 
+    // Datos de prueba
     static {
         addItem(new BookItem(1,"Título 1","Autor 1", setDate(2000,12,31),"Descripción 1","url 1"));
         addItem(new BookItem(2,"Título 2","Autor 2", setDate(1994,10,24),"Descripción 2","url 2"));
@@ -40,9 +40,8 @@ public class DummyContent {
     }
 
     // Método helper para convertir las fechas a Date.
-    private static Date setDate(int año, int mes, int dia){
-        Calendar calendar = new GregorianCalendar(año,mes-1, dia);
-        Log.wtf("Fecha",calendar.getTime().toString());
+    private static Date setDate(int year, int mes, int dia){
+        Calendar calendar = new GregorianCalendar(year,mes-1, dia);
         return calendar.getTime();
     }
 
@@ -66,7 +65,7 @@ public class DummyContent {
             this.URLImagenPortada = URL;
         }
 
-        @Override
+        @Override @NonNull
         public String toString() {
             return titulo + " escrito por " + autor;
         }

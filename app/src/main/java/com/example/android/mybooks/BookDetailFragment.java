@@ -1,6 +1,7 @@
 package com.example.android.mybooks;
 
 import android.app.Activity;
+import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -51,7 +52,7 @@ public class BookDetailFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.book_detail, container, false);
         // Formateamos la fecha para presentarla en el formato del país de origen.
         DateFormat df = DateFormat.getDateInstance(DateFormat.MEDIUM);
