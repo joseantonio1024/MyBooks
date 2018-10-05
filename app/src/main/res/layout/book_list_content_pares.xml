@@ -1,28 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="80dp"
-    android:background="@color/book_list_content_background_pares">
+    card_view:cardElevation="2dp"
+    card_view:cardCornerRadius="4dp"
+    android:layout_margin="16dp">
 
-    <TextView
-        android:id="@+id/book_list_content_tv_titulo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/text_margin"
-        android:layout_marginTop="@dimen/text_margin"
-        android:textColor="@color/book_list_content_title_color"
-        android:textSize="20sp"
-        tools:text="Title2" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/book_list_content_tv_autor"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginEnd="@dimen/text_margin"
-        android:textColor="@color/book_list_content_author_color"
-        android:textSize="18sp"
-        tools:text="Author2" />
-</RelativeLayout>
+        <TextView
+            android:id="@+id/book_list_content_tv_titulo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/text_margin"
+            android:layout_marginTop="@dimen/text_margin"
+            android:textColor="@color/title_color"
+            android:textSize="20sp"
+            tools:text="Title2" />
+
+        <TextView
+            android:id="@+id/book_list_content_tv_autor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginEnd="@dimen/text_margin"
+            android:textColor="@color/author_color"
+            android:textSize="18sp"
+            tools:text="Author2" />
+    </RelativeLayout>
+</android.support.v7.widget.CardView>

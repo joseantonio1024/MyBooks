@@ -9,6 +9,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import com.example.android.mybooks.model.DummyContent;
+import java.text.DateFormat;
+
 
 /**
  * A fragment representing a single Book detail screen. This fragment is either contained in a {@link BookListActivity}
@@ -29,8 +31,7 @@ public class BookDetailFragment extends Fragment {
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public BookDetailFragment() {
-    }
+    public BookDetailFragment() { }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -52,12 +53,16 @@ public class BookDetailFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.book_detail, container, false);
+        // Formateamos la fecha para presentarla en el formato del país de origen.
+        DateFormat df = DateFormat.getDateInstance(DateFormat.MEDIUM);
 
-        // Se muestran los datos de un libro. La imagen de portada, de momento es una imagen estática.
+
+        // Se muestran los detalles de un libro.
         if (mItem != null) {
             ((TextView) rootView.findViewById(R.id.tv_autor)).setText(mItem.autor);
-            ((TextView) rootView.findViewById(R.id.tv_fecha)).setText(mItem.fechaPublicacion);
+            ((TextView) rootView.findViewById(R.id.tv_fecha)).setText(df.format(mItem.fechaPublicacion));
             ((TextView) rootView.findViewById(R.id.tv_descripcion)).setText(mItem.descripcion);
+            // La imagen de portada, de momento es una imagen estática.
             //((TextView) rootView.findViewById(R.id.tv_url_imagen)).setText(mItem.URLImagenPortada);
         }
 

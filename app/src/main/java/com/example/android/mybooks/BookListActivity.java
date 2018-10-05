@@ -5,10 +5,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -54,12 +56,18 @@ public class BookListActivity extends AppCompatActivity {
 
         View recyclerView = findViewById(R.id.book_list);
         assert recyclerView != null;
-        setupRecyclerView((RecyclerView) recyclerView);
+        // Añadimos el LayoutManager aquí en vez de en book_list.xml
+        ((RecyclerView) recyclerView).setLayoutManager(new LinearLayoutManager(this));
+        SimpleItemRecyclerViewAdapter adapter = new SimpleItemRecyclerViewAdapter(this,DummyContent.ITEMS,mTwoPane);
+        ((RecyclerView) recyclerView).setAdapter(adapter);
+        adapter.notifyDataSetChanged();
+
     }
 
-    private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(this, DummyContent.ITEMS, mTwoPane));
-    }
+
+
+
+
 
     public static class SimpleItemRecyclerViewAdapter extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
 
@@ -107,14 +115,15 @@ public class BookListActivity extends AppCompatActivity {
                 return LAYOUT_IMPAR;
         }
 
-        @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        @Override @NonNull
+        public ViewHolder onCreateViewHolder (ViewGroup parent, int viewType) {
             View view;
+            Log.w("onCreateViewHolder",parent.toString());
             // Se infla un layout diferente en función de si es par o impar.
             if(viewType == LAYOUT_PAR) {
-                view = LayoutInflater.from(parent.getContext()).inflate(R.layout.book_list_content_impares, parent, false);
-            }else {
                 view = LayoutInflater.from(parent.getContext()).inflate(R.layout.book_list_content_pares, parent, false);
+            }else {
+                view = LayoutInflater.from(parent.getContext()).inflate(R.layout.book_list_content_impares, parent, false);
             }
             return new ViewHolder(view);
         }
@@ -132,6 +141,9 @@ public class BookListActivity extends AppCompatActivity {
         public int getItemCount() {
             return mValues.size();
         }
+
+
+
 
         class ViewHolder extends RecyclerView.ViewHolder {
             final TextView mTituloView;
