@@ -14,7 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import com.example.android.mybooks.model.DummyContent;
+import com.example.android.mybooks.model.BookContent;
 import java.util.List;
 
 /**
@@ -57,7 +57,7 @@ public class BookListActivity extends AppCompatActivity {
         // Añadimos el LayoutManager aquí en vez de en book_list.xml
         ((RecyclerView) recyclerView).setLayoutManager(new LinearLayoutManager(this));
         // Creamos el adapter y le pasamos los datos de ejemplo.
-        SimpleItemRecyclerViewAdapter adapter = new SimpleItemRecyclerViewAdapter(this,DummyContent.ITEMS,mTwoPane);
+        SimpleItemRecyclerViewAdapter adapter = new SimpleItemRecyclerViewAdapter(this,BookContent.ITEMS,mTwoPane);
         // Unimos el adapter al recyclerView para ingresar los datos
         ((RecyclerView) recyclerView).setAdapter(adapter);
         adapter.notifyDataSetChanged();
@@ -70,7 +70,7 @@ public class BookListActivity extends AppCompatActivity {
     public static class SimpleItemRecyclerViewAdapter extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
 
         private final BookListActivity mParentActivity;
-        private final List<DummyContent.BookItem> mValues;
+        private final List<BookContent.BookItem> mValues;
         private final boolean mTwoPane;
 
         // constantes utilizadas para alternar los colores de las cardViews
@@ -80,7 +80,7 @@ public class BookListActivity extends AppCompatActivity {
         private final View.OnClickListener mOnClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                DummyContent.BookItem item = (DummyContent.BookItem) view.getTag();
+                BookContent.BookItem item = (BookContent.BookItem) view.getTag();
                 if (mTwoPane) {
                     Bundle arguments = new Bundle();
                     arguments.putString(BookDetailFragment.ARG_ITEM_ID, String.valueOf(item.identificador));
@@ -97,7 +97,7 @@ public class BookListActivity extends AppCompatActivity {
             }
         };
 
-        SimpleItemRecyclerViewAdapter(BookListActivity parent, List<DummyContent.BookItem> items, boolean twoPane) {
+        SimpleItemRecyclerViewAdapter(BookListActivity parent, List<BookContent.BookItem> items, boolean twoPane) {
             mValues = items;
             mParentActivity = parent;
             mTwoPane = twoPane;

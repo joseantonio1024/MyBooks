@@ -12,7 +12,7 @@ import java.util.Map;
 /**
  * Helper class for providing sample content for user interfaces.
  */
-public class DummyContent {
+public class BookContent {
 
     /**
      * An array of sample (book) items.
