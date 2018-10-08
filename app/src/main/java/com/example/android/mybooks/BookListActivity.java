@@ -60,13 +60,13 @@ public class BookListActivity extends AppCompatActivity {
         SimpleItemRecyclerViewAdapter adapter = new SimpleItemRecyclerViewAdapter(this,BookContent.ITEMS,mTwoPane);
         // Unimos el adapter al recyclerView para ingresar los datos
         ((RecyclerView) recyclerView).setAdapter(adapter);
-        adapter.notifyDataSetChanged();
+
     }
 
 
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Crea el adaptador que extiende de RecyblerView.Adapter
+    // Crea el adaptador que extiende de RecyclerView.Adapter
     public static class SimpleItemRecyclerViewAdapter extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
 
         private final BookListActivity mParentActivity;
