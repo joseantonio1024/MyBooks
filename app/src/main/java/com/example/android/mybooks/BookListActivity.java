@@ -15,6 +15,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import com.example.android.mybooks.model.BookContent;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import java.util.List;
 
 /**
@@ -26,11 +30,17 @@ public class BookListActivity extends AppCompatActivity {
 
     /** Whether or not the activity is in two-pane mode, i.e. running on a tablet device. */
     private boolean mTwoPane;
+    private FirebaseAuth mAuth;
+    private FirebaseDatabase database;
+    private DatabaseReference mDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_book_list);
+
+        mAuth = FirebaseAuth.getInstance();
+        mDatabase = FirebaseDatabase.getInstance().getReference();
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
