@@ -10,14 +10,19 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.example.android.mybooks.model.BookContent;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.List;
 
@@ -27,20 +32,71 @@ import java.util.List;
  * item details. On tablets, the activity presents the list of items and item details side-by-side using two vertical panes.
  */
 public class BookListActivity extends AppCompatActivity {
+    public final static String AUTH_DEBUG = "AUTH_DEBUG:";
 
     /** Whether or not the activity is in two-pane mode, i.e. running on a tablet device. */
     private boolean mTwoPane;
+    // Declaramos los objetos FirebaseAuth y AuthStateListener.
     private FirebaseAuth mAuth;
-    private FirebaseDatabase database;
-    private DatabaseReference mDatabase;
+    private FirebaseAuth.AuthStateListener mAuthListener;
+
+    //private FirebaseDatabase database;
+    //private DatabaseReference mDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_book_list);
 
+        // Inicializamos la instancia de FirebaseAuth.
         mAuth = FirebaseAuth.getInstance();
-        mDatabase = FirebaseDatabase.getInstance().getReference();
+        // Inicializamos el método AuthStateListener para ver cuando el usuario hace sign in o sign out.
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                    // User is signed in
+                    Log.d(AUTH_DEBUG, "onAuthStateChanged:signed_in:" + user.getUid());
+                    //TODO: seguir con el proceso
+                } else {
+                    // User is signed out
+                    Log.d(AUTH_DEBUG, "onAuthStateChanged:signed_out");
+                }
+            }
+        };
+
+        // credenciales de prueba de un usuario de la base de datos.
+        String email = "jose@email.es";
+        String password = "123456";
+        // Método que crea un nuevo usuario con email y password.
+        mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        Log.d(AUTH_DEBUG, "createUserWithEmail:onComplete:" + task.isSuccessful());
+                        // If sign in fails, display a message to the user. If sign in succeeds the auth state listener
+                        // will be notified and logic to handle the signed in user can be handled in the listener.
+                        if (!task.isSuccessful()) {
+                            Toast.makeText(BookListActivity.this, R.string.auth_failed, Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
+
+        // Método que inicia sesion de un usuario con email y password.
+        mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        Log.d(AUTH_DEBUG, "signInWithEmail:onComplete:" + task.isSuccessful());
+
+                        // If sign in fails, display a message to the user. If sign in succeeds the auth state listener
+                        // will be notified and logic to handle the signed in user can be handled in the listener.
+                        if (!task.isSuccessful()) {
+                            Log.w(AUTH_DEBUG, "signInWithEmail:failed", task.getException());
+                            Toast.makeText(BookListActivity.this, R.string.auth_failed, Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
+        //mDatabase = FirebaseDatabase.getInstance().getReference();
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -50,8 +106,7 @@ public class BookListActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG).setAction("Action", null).show();
             }
         });
 
@@ -67,13 +122,29 @@ public class BookListActivity extends AppCompatActivity {
         // Añadimos el LayoutManager aquí en vez de en book_list.xml
         ((RecyclerView) recyclerView).setLayoutManager(new LinearLayoutManager(this));
         // Creamos el adapter y le pasamos los datos de ejemplo.
-        SimpleItemRecyclerViewAdapter adapter = new SimpleItemRecyclerViewAdapter(this,BookContent.ITEMS,mTwoPane);
+        SimpleItemRecyclerViewAdapter adapter = new SimpleItemRecyclerViewAdapter(this, BookContent.ITEMS, mTwoPane);
         // Unimos el adapter al recyclerView para ingresar los datos
         ((RecyclerView) recyclerView).setAdapter(adapter);
+        Log.d(AUTH_DEBUG,"onCreate()");
+    }//End onCreate()
 
-    }
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // cuando ejecutamos la app añadimos el listener a nuestra instancia mAuth.
+        mAuth.addAuthStateListener(mAuthListener);
+        Log.d(AUTH_DEBUG,"onStart()");
+    }//End onStart()
 
-
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(mAuthListener != null){
+            // Cuando la app se cierra eliminamos el listener de nuestra instancia mAuth
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
+        Log.d(AUTH_DEBUG,"onStop()");
+    }//End onStop()
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Crea el adaptador que extiende de RecyclerView.Adapter
