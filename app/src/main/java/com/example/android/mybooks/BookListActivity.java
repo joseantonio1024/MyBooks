@@ -17,14 +17,22 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.android.mybooks.model.BookContent;
+import com.example.android.mybooks.model.Book;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * An activity representing a list of Books. This activity has different presentations for handset and tablet-size devices.
@@ -32,16 +40,21 @@ import java.util.List;
  * item details. On tablets, the activity presents the list of items and item details side-by-side using two vertical panes.
  */
 public class BookListActivity extends AppCompatActivity {
-    public final static String AUTH_DEBUG = "AUTH_DEBUG:";
 
     /** Whether or not the activity is in two-pane mode, i.e. running on a tablet device. */
     private boolean mTwoPane;
+
+    // Declaramos la lista y el mapa de libros que poblaremos desde la base de datos.
+    List<Book> mBooks;
+    public static final Map<String,Book> mBooksMap = new HashMap<>();
+
+    // Declaramos el recyclerViewAdapter global.
+    SimpleItemRecyclerViewAdapter mAdapter;
+
     // Declaramos los objetos FirebaseAuth y AuthStateListener.
+    //TODO: convertir en variables locales.
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
-
-    //private FirebaseDatabase database;
-    //private DatabaseReference mDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,27 +70,27 @@ public class BookListActivity extends AppCompatActivity {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
                     // User is signed in
-                    Log.d(AUTH_DEBUG, "onAuthStateChanged:signed_in:" + user.getUid());
+                    Log.d("AUTH_DEBUG", "onAuthStateChanged:signed_in: " + user.getUid());
                     //TODO: seguir con el proceso
                 } else {
                     // User is signed out
-                    Log.d(AUTH_DEBUG, "onAuthStateChanged:signed_out");
+                    Log.d("AUTH_DEBUG", "onAuthStateChanged:signed_out");
                 }
             }
         };
 
-        // credenciales de prueba de un usuario de la base de datos.
+        // credenciales de un usuario de la base de datos.
         String email = "jose@email.es";
         String password = "123456";
         // Método que crea un nuevo usuario con email y password.
         mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        Log.d(AUTH_DEBUG, "createUserWithEmail:onComplete:" + task.isSuccessful());
+                        Log.d("AUTH_DEBUG", "createUserWithEmail:onComplete:" + task.isSuccessful());
                         // If sign in fails, display a message to the user. If sign in succeeds the auth state listener
                         // will be notified and logic to handle the signed in user can be handled in the listener.
                         if (!task.isSuccessful()) {
-                            Toast.makeText(BookListActivity.this, R.string.auth_failed, Toast.LENGTH_LONG).show();
+                            Toast.makeText(BookListActivity.this, "Creación de user fallida", Toast.LENGTH_LONG).show();
                         }
                     }
                 });
@@ -86,17 +99,17 @@ public class BookListActivity extends AppCompatActivity {
         mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        Log.d(AUTH_DEBUG, "signInWithEmail:onComplete:" + task.isSuccessful());
+                        Log.d("AUTH_DEBUG", "signInWithEmail:onComplete:" + task.isSuccessful());
 
                         // If sign in fails, display a message to the user. If sign in succeeds the auth state listener
                         // will be notified and logic to handle the signed in user can be handled in the listener.
                         if (!task.isSuccessful()) {
-                            Log.w(AUTH_DEBUG, "signInWithEmail:failed", task.getException());
-                            Toast.makeText(BookListActivity.this, R.string.auth_failed, Toast.LENGTH_LONG).show();
+                            Log.w("AUTH_DEBUG", "signInWithEmail:failed", task.getException());
+                            Toast.makeText(BookListActivity.this, "login de user correcto", Toast.LENGTH_LONG).show();
                         }
                     }
                 });
-        //mDatabase = FirebaseDatabase.getInstance().getReference();
+
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -116,16 +129,46 @@ public class BookListActivity extends AppCompatActivity {
             mTwoPane = true;
         }
 
+        mBooks = new ArrayList<>();
+
         // Buscamos el recyclerView en el layout.
         View recyclerView = findViewById(R.id.book_list);
         assert recyclerView != null;
         // Añadimos el LayoutManager aquí en vez de en book_list.xml
         ((RecyclerView) recyclerView).setLayoutManager(new LinearLayoutManager(this));
-        // Creamos el adapter y le pasamos los datos de ejemplo.
-        SimpleItemRecyclerViewAdapter adapter = new SimpleItemRecyclerViewAdapter(this, BookContent.ITEMS, mTwoPane);
-        // Unimos el adapter al recyclerView para ingresar los datos
-        ((RecyclerView) recyclerView).setAdapter(adapter);
-        Log.d(AUTH_DEBUG,"onCreate()");
+        // Creamos el mAdapter y le pasamos los datos de ejemplo.
+        mAdapter = new SimpleItemRecyclerViewAdapter(this, mBooks, mTwoPane);
+        // Unimos el mAdapter al recyclerView para ingresar los datos
+        ((RecyclerView) recyclerView).setAdapter(mAdapter);
+
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference dbRef = database.getReference("books");
+        dbRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                mBooks.removeAll(mBooks);
+                mBooksMap.clear();
+
+                for(DataSnapshot snapshot: dataSnapshot.getChildren()){
+                    Book bookItem = snapshot.getValue(Book.class);
+                    String id = snapshot.getKey();
+                    bookItem.setIdentificator(Integer.parseInt(id));
+                    mBooksMap.put(id,bookItem);
+
+                    //Log.d(AUTH_DEBUG, bookItem.getPublicationDate());
+                    mBooks.add(bookItem);
+                }
+                mAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        Log.d("AUTH_DEBUG","onCreate()");
     }//End onCreate()
 
     @Override
@@ -133,7 +176,7 @@ public class BookListActivity extends AppCompatActivity {
         super.onStart();
         // cuando ejecutamos la app añadimos el listener a nuestra instancia mAuth.
         mAuth.addAuthStateListener(mAuthListener);
-        Log.d(AUTH_DEBUG,"onStart()");
+        Log.d("AUTH_DEBUG","onStart()");
     }//End onStart()
 
     @Override
@@ -143,7 +186,7 @@ public class BookListActivity extends AppCompatActivity {
             // Cuando la app se cierra eliminamos el listener de nuestra instancia mAuth
             mAuth.removeAuthStateListener(mAuthListener);
         }
-        Log.d(AUTH_DEBUG,"onStop()");
+        Log.d("AUTH_DEBUG","onStop()");
     }//End onStop()
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -151,7 +194,7 @@ public class BookListActivity extends AppCompatActivity {
     public static class SimpleItemRecyclerViewAdapter extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
 
         private final BookListActivity mParentActivity;
-        private final List<BookContent.BookItem> mValues;
+        private final List<Book> mValues;
         private final boolean mTwoPane;
 
         // constantes utilizadas para alternar los colores de las cardViews
@@ -161,24 +204,24 @@ public class BookListActivity extends AppCompatActivity {
         private final View.OnClickListener mOnClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                BookContent.BookItem item = (BookContent.BookItem) view.getTag();
+                Book item = (Book) view.getTag();
                 if (mTwoPane) {
                     Bundle arguments = new Bundle();
-                    arguments.putString(BookDetailFragment.ARG_ITEM_ID, String.valueOf(item.identificador));
+                    arguments.putString(BookDetailFragment.ARG_ITEM_ID, String.valueOf(item.getIdentificator()));
                     BookDetailFragment fragment = new BookDetailFragment();
                     fragment.setArguments(arguments);
                     mParentActivity.getSupportFragmentManager().beginTransaction().replace(R.id.book_detail_container, fragment).commit();
                 } else {
                     Context context = view.getContext();
                     Intent intent = new Intent(context, BookDetailActivity.class);
-                    intent.putExtra(BookDetailFragment.ARG_ITEM_ID, String.valueOf(item.identificador));
+                    intent.putExtra(BookDetailFragment.ARG_ITEM_ID, String.valueOf(item.getIdentificator()));
 
                     context.startActivity(intent);
                 }
             }
         };
 
-        SimpleItemRecyclerViewAdapter(BookListActivity parent, List<BookContent.BookItem> items, boolean twoPane) {
+        SimpleItemRecyclerViewAdapter(BookListActivity parent, List<Book> items, boolean twoPane) {
             mValues = items;
             mParentActivity = parent;
             mTwoPane = twoPane;
@@ -211,8 +254,8 @@ public class BookListActivity extends AppCompatActivity {
         // ingresa los datos en el item a través del holder.
         @Override
         public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
-            holder.mTituloView.setText(mValues.get(position).titulo);
-            holder.mAutorView.setText(mValues.get(position).autor);
+            holder.mTituloView.setText(mValues.get(position).getTitle());
+            holder.mAutorView.setText(mValues.get(position).getAuthor());
 
             holder.itemView.setTag(mValues.get(position));
             holder.itemView.setOnClickListener(mOnClickListener);

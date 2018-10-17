@@ -2,21 +2,19 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/book_detail"
-    style="?android:attr/textAppearanceLarge"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
     android:padding="16dp"
-    android:textIsSelectable="true"
     tools:context=".BookDetailFragment">
 
     <ImageView
-        android:id="@+id/tv_url_imagen"
+        android:id="@+id/iv_imagen_libro"
         android:layout_width="112dp"
         android:layout_height="160dp"
         android:contentDescription="@string/portada_del_libro"
         android:scaleType="centerCrop"
-        android:src="@drawable/portada_libro" />
+        tools:src="@drawable/portada_libro" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -41,8 +39,8 @@
         <TextView
             android:id="@+id/tv_descripcion"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="24sp"
+            android:layout_height="match_parent"
+            android:textSize="22sp"
             tools:text="descripcion" />
     </LinearLayout>
 

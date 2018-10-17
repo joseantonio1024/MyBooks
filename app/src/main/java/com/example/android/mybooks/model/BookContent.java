@@ -17,12 +17,12 @@ public class BookContent {
     /**
      * An array of sample (book) items.
      */
-    public static final List<BookItem> ITEMS = new ArrayList<BookItem>();
+    //public static final List<BookItem> ITEMS = new ArrayList<BookItem>();
 
     /**
      * A map of sample (book) items, by ID.
      */
-    public static final Map<String, BookItem> ITEM_MAP = new HashMap<String, BookItem>();
+    //public static final Map<String, BookItem> ITEM_MAP = new HashMap<String, BookItem>();
 
     // Datos de prueba
     static {
@@ -35,8 +35,8 @@ public class BookContent {
     }
 
     private static void addItem(BookItem item) {
-        ITEMS.add(item);
-        ITEM_MAP.put(String.valueOf(item.identificador), item);
+        //ITEMS.add(item);
+        //ITEM_MAP.put(String.valueOf(item.identificador), item);
     }
 
     // Método helper para convertir las fechas a Date.
