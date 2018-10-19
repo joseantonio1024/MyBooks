@@ -42,17 +42,19 @@ public class BookDetailFragment extends Fragment {
         if (getArguments().containsKey(ARG_ITEM_ID)) {
             // Loads the book specified by the fragment arguments.
             mItem = BookListActivity.mBooksMap.get(getArguments().getString(ARG_ITEM_ID));
-            // Shows the title of the book in the toolbar.
-            Activity activity = this.getActivity();
-            CollapsingToolbarLayout appBarLayout = activity.findViewById(R.id.toolbar_layout);
-            if (appBarLayout != null) {
-                appBarLayout.setTitle(mItem.getTitle());
-            }
+
         }
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        // Shows the title of the book in the toolbar.
+        Activity activity = this.getActivity();
+        CollapsingToolbarLayout appBarLayout = activity.findViewById(R.id.toolbar_layout);
+        if (appBarLayout != null) {
+            appBarLayout.setTitle(mItem.getTitle());
+        }
+
         View rootView = inflater.inflate(R.layout.book_detail, container, false);
         // TODO: Mirar por qué la descripción no se muestra hasta el fondo de la pantalla.
         // Shows book details.
