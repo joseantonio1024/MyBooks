@@ -10,6 +10,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,6 +53,11 @@ public class BookListActivity extends AppCompatActivity {
     // object to authenticate users.
     private FirebaseAuth mAuth;
 
+    // variables with the identification of a database user.
+    // it would be better to convert them to local, but we put them here for the purpose of clarity.
+    private String email = "jose@email.es";
+    private String password = "123456";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,9 +67,8 @@ public class BookListActivity extends AppCompatActivity {
         initFab();
         isTwoPane();
         initRecyclerView();
-        signin();
+        signin(email,password);
     }//End onCreate()
-
     private void initToolbar(){
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -95,12 +100,9 @@ public class BookListActivity extends AppCompatActivity {
         // attach mAdapter to recyclerView for populate data
         ((RecyclerView) recyclerView).setAdapter(mAdapter);
     }
-    private void signin(){
+    private void signin(String email, String password){
         // initialize FirebaseAuth instance.
         mAuth = FirebaseAuth.getInstance();
-        // identification of a database user.
-        String email = "jose@email.es";
-        String password = "123456";
 
         // sign in with email and password :)
         mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -109,19 +111,16 @@ public class BookListActivity extends AppCompatActivity {
                 if (task.isSuccessful()) {
                     // Sign in success, download data from database with the signed-in user.
                     FirebaseUser user = mAuth.getCurrentUser();
-                    Toast.makeText(BookListActivity.this,"User is registered with email: " + user.getEmail(),Toast.LENGTH_LONG).show();
-                    downloadData(user);
+                    Toast.makeText(BookListActivity.this,"User is registered with email: " + user.getEmail(),Toast.LENGTH_SHORT).show();
+                    downloadData();
                 } else {
                     // If sign in fails, display a message to the user.
-                    Toast.makeText(BookListActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
-                    downloadData(null);
+                    Toast.makeText(BookListActivity.this, "Authentication failed.", Toast.LENGTH_LONG).show();
                 }
             }
         });
     }
-    private void downloadData(FirebaseUser user){
-        if(user!=null){
-            // user is registered.
+    private void downloadData(){
             FirebaseDatabase database = FirebaseDatabase.getInstance();
             DatabaseReference dbRef = database.getReference("books");
             dbRef.addValueEventListener(new ValueEventListener() {
@@ -150,10 +149,6 @@ public class BookListActivity extends AppCompatActivity {
                     Toast.makeText(BookListActivity.this, "Downloading cancelled",Toast.LENGTH_LONG).show();
                 }
             });
-        }else{
-            // if the user is not registered, show a message.
-            Toast.makeText(this,"User not registered",Toast.LENGTH_LONG).show();
-        }
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
