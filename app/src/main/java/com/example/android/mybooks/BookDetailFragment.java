@@ -5,7 +5,6 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,10 +40,9 @@ public class BookDetailFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         if (getArguments().containsKey(ARG_ITEM_ID)) {
-            // Load the books specified by the fragment arguments. In a real-world scenario, use a Loader
-            // to load content from a content provider.
+            // Loads the book specified by the fragment arguments.
             mItem = BookListActivity.mBooksMap.get(getArguments().getString(ARG_ITEM_ID));
-
+            // Shows the title of the book in the toolbar.
             Activity activity = this.getActivity();
             CollapsingToolbarLayout appBarLayout = activity.findViewById(R.id.toolbar_layout);
             if (appBarLayout != null) {
@@ -56,22 +54,15 @@ public class BookDetailFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.book_detail, container, false);
-        // TODO: arreglar el formato de fecha y mirar por qué la descripción no se muestra hasta el fondo de la pantalla.
-        // Formateamos la fecha para presentarla en el formato del país de origen.
-        //DateFormat df = DateFormat.getDateInstance(DateFormat.MEDIUM);
-        //String fechaDebug = df.format(mItem.getDate());
-        //Log.d("FRAGMENTOOOO: ", fechaDebug);
-        //Log.d("BOOKDETAILFRAGMENT: " ,mItem.getPublication_date());
-
-        // Se muestran los detalles de un libro.
+        // TODO: Mirar por qué la descripción no se muestra hasta el fondo de la pantalla.
+        // Shows book details.
         if (mItem != null) {
             ((TextView) rootView.findViewById(R.id.tv_autor)).setText(mItem.getAuthor());
             ((TextView) rootView.findViewById(R.id.tv_fecha)).setText(mItem.getPublication_date());
             ((TextView) rootView.findViewById(R.id.tv_descripcion)).setText(mItem.getDescription());
-            // Utilizamos la librería Picasso para mostrar la imagen del ítem.
+            // Uses Picasso library to show the book image.
             Picasso.get().load(mItem.getUrl_image()).into((ImageView)rootView.findViewById(R.id.iv_imagen_libro));
         }
-
         return rootView;
     }
 }
