@@ -11,7 +11,7 @@ import android.support.v7.app.ActionBar;
 import android.view.MenuItem;
 
 /**
- * An activity representing a single Book detail screen. This activity is only used on narrow width devices. On tablet-size devices,
+ * An activity representing a single BookItem detail screen. This activity is only used on narrow width devices. On tablet-size devices,
  * book details are presented side-by-side with a list of books in a {@link BookListActivity}.
  */
 public class BookDetailActivity extends AppCompatActivity {

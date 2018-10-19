@@ -10,12 +10,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import com.example.android.mybooks.model.Book;
+import com.example.android.mybooks.model.BookContent;
 import com.squareup.picasso.Picasso;
 
 
 /**
- * A fragment representing a single Book detail screen. This fragment is either contained in a {@link BookListActivity}
+ * A fragment representing a single BookItem detail screen. This fragment is either contained in a {@link BookListActivity}
  * in two-pane mode (on tablets) or a {@link BookDetailActivity} on handsets.
  */
 public class BookDetailFragment extends Fragment {
@@ -27,7 +27,7 @@ public class BookDetailFragment extends Fragment {
     /**
      * The content this fragment is presenting.
      */
-    private Book mItem;
+    private BookContent.BookItem mItem;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -41,7 +41,7 @@ public class BookDetailFragment extends Fragment {
 
         if (getArguments().containsKey(ARG_ITEM_ID)) {
             // Loads the book specified by the fragment arguments.
-            mItem = BookListActivity.mBooksMap.get(getArguments().getString(ARG_ITEM_ID));
+            mItem = BookContent.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));
 
         }
     }

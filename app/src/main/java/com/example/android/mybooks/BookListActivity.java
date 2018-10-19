@@ -1,5 +1,6 @@
 package com.example.android.mybooks;
 
+import com.example.android.mybooks.model.BookContent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,14 +11,11 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.example.android.mybooks.model.Book;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -28,11 +26,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * An activity representing a list of Books. This activity has different presentations for handset and tablet-size devices.
@@ -43,10 +37,6 @@ public class BookListActivity extends AppCompatActivity {
 
     // Whether or not the activity is in two-pane mode, i.e. running on a tablet device. */
     private boolean mTwoPane;
-
-    // the list and map that will be populated from de database.
-    private List<Book> mBooks = new ArrayList<>();
-    public static final Map<String,Book> mBooksMap = new HashMap<>();
 
     private SimpleItemRecyclerViewAdapter mAdapter;
 
@@ -96,7 +86,7 @@ public class BookListActivity extends AppCompatActivity {
         // add LayoutManager here instead of book_list.xml
         ((RecyclerView) recyclerView).setLayoutManager(new LinearLayoutManager(this));
         // create the mAdapter and pass the data.
-        mAdapter = new SimpleItemRecyclerViewAdapter(this, mBooks, mTwoPane);
+        mAdapter = new SimpleItemRecyclerViewAdapter(this, BookContent.ITEMS, mTwoPane);
         // attach mAdapter to recyclerView for populate data
         ((RecyclerView) recyclerView).setAdapter(mAdapter);
     }
@@ -127,19 +117,19 @@ public class BookListActivity extends AppCompatActivity {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     // clear the list and map in order to fill them again.
-                    mBooks.removeAll(mBooks);
-                    mBooksMap.clear();
+                    BookContent.ITEMS.removeAll(BookContent.ITEMS);
+                    BookContent.ITEM_MAP.clear();
 
                     for(DataSnapshot snapshot: dataSnapshot.getChildren()){
                         // asign data to a book.
-                        Book bookItem = snapshot.getValue(Book.class);
+                        BookContent.BookItem bookItem = snapshot.getValue(BookContent.BookItem.class);
                         // asign identificator to a book.
                         String id = snapshot.getKey();
                         bookItem.setIdentificator(Integer.parseInt(id));
                         // map the book with its identificator
-                        mBooksMap.put(id,bookItem);
+                        BookContent.ITEM_MAP.put(id,bookItem);
 
-                        mBooks.add(bookItem);
+                        BookContent.ITEMS.add(bookItem);
                     }
                     mAdapter.notifyDataSetChanged();
                 }
@@ -156,7 +146,7 @@ public class BookListActivity extends AppCompatActivity {
     public static class SimpleItemRecyclerViewAdapter extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
 
         private final BookListActivity mParentActivity;
-        private final List<Book> mValues;
+        private final List<BookContent.BookItem> mValues;
         private final boolean mTwoPane;
 
         // constants used to swap cardView colors.
@@ -169,7 +159,7 @@ public class BookListActivity extends AppCompatActivity {
          * @param items The list of books.
          * @param twoPane Whether or not the activity is in two-pane mode.
          */
-        SimpleItemRecyclerViewAdapter(BookListActivity parent, List<Book> items, boolean twoPane) {
+        SimpleItemRecyclerViewAdapter(BookListActivity parent, List<BookContent.BookItem> items, boolean twoPane) {
             mValues = items;
             mParentActivity = parent;
             mTwoPane = twoPane;
@@ -179,7 +169,7 @@ public class BookListActivity extends AppCompatActivity {
         private final View.OnClickListener mOnClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Book item = (Book) view.getTag();
+                BookContent.BookItem item = (BookContent.BookItem) view.getTag();
                 if (mTwoPane) {
                     Bundle arguments = new Bundle();
                     arguments.putString(BookDetailFragment.ARG_ITEM_ID, String.valueOf(item.getIdentificator()));
