@@ -1,6 +1,7 @@
 <resources>
-    <string name="app_name">Mis libros</string>
-    <string name="title_book_detail">Detalles del libro</string>
-    <string name="portada_del_libro">portada del libro</string>
-    <string name="auth_failed">Autenticación fallida</string>
+    <string name="app_name">My books</string>
+    <string name="title_book_detail">Book details</string>
+    <string name="book_cover">Book cover</string>
+    <string name="auth_failed_showing_ddbb">Authentication failed\nShowing local database</string>
+    <string name="user_register_with_email">User is registered with email: </string>
 </resources>

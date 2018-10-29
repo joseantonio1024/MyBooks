@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +13,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import com.example.android.mybooks.model.BookContent;
 import com.squareup.picasso.Picasso;
+
+import static com.example.android.mybooks.model.BookContent.d;
 
 
 /**
@@ -42,7 +45,6 @@ public class BookDetailFragment extends Fragment {
         if (getArguments().containsKey(ARG_ITEM_ID)) {
             // Loads the book specified by the fragment arguments.
             mItem = BookContent.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));
-
         }
     }
 

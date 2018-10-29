@@ -36,6 +36,7 @@ public class BookDetailActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
+
         }
 
         // savedInstanceState is non-null when there is fragment state saved from previous configurations of this activity

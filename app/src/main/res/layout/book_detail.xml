@@ -12,7 +12,7 @@
         android:id="@+id/iv_imagen_libro"
         android:layout_width="112dp"
         android:layout_height="160dp"
-        android:contentDescription="@string/portada_del_libro"
+        android:contentDescription="@string/book_cover"
         android:scaleType="centerCrop"
         tools:src="@drawable/portada_libro" />
 
