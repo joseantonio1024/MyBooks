@@ -64,8 +64,6 @@ public class BookListActivity extends AppCompatActivity {
 
         Stetho.initializeWithDefaults(this);
 
-        //BookContent.BookItem.deleteAll(BookContent.BookItem.class);
-
         initToolbar();
         initFab();
         isTwoPane();
@@ -133,11 +131,7 @@ public class BookListActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 Log.d(d, "se lanza el evento onDataChange()");
-                // If there is any change in the books on the server, downloads them from Firebase.
-                //GenericTypeIndicator<ArrayList<BookContent.BookItem>> t = new GenericTypeIndicator<ArrayList<BookContent.BookItem>>() {};
-                //ArrayList<BookContent.BookItem> booksFromServer = dataSnapshot.getValue(t);
 
-                // Solució amb Map.---------------------------------------------------------------------------------
                 // If there is any change in data on the server, downloads a map with the keys and corresponding books
                 GenericTypeIndicator<Map<String, BookContent.BookItem>> t = new GenericTypeIndicator<Map<String, BookContent.BookItem>>() {};
                 Map<String, BookContent.BookItem> map = dataSnapshot.getValue(t);
@@ -157,66 +151,9 @@ public class BookListActivity extends AppCompatActivity {
                     }
                 }
                 BookContent.updateLocalDatabase();
-/*
-                    if (dataSnapshot.exists()) {
-                        Log.d(d,"dataSnapshot exists");
-                        // Clear the global list (ITEMS) and map (ITEM_MAP) in order to fill them again.
-                        BookContent.ITEMS.clear();
-                        BookContent.ITEM_MAP.clear();
 
-                        String[] childrenID= new String[(int)dataSnapshot.getChildrenCount()];
-                        int contador=0;
-                        for (DataSnapshot child : dataSnapshot.getChildren()) {
-                            //Get keys individually.
-                            childrenID[contador] = child.getKey();
-                            contador++;
-                        }
-
-                        // Gets all the books from Firebase.
-                        for (int i = 0; i<booksFromServer.size(); i++) {
-                            Log.d(d,"inicio de bucle");
-                            //Adds a book to the list.
-                            BookContent.ITEMS.add(booksFromServer.get(i));
-                            Log.d(d, booksFromServer.get(i).getTitle()+"");
-                            Log.d(d,BookContent.ITEMS.get(i)+"");
-                            Log.d(d,booksFromServer.size()+"");
-
-                            // Sets the identificator of the book.
-                            Log.d(d,childrenID[i]);
-                            BookContent.ITEMS.get(i).setIdentificator(Integer.parseInt(childrenID[i]));
-                            Log.d(d,BookContent.ITEMS.get(i).getIdentificator()+"");
-
-
-                            // Maps the book with its identificator of the server Firebase
-                            BookContent.ITEM_MAP.put(childrenID[i], BookContent.ITEMS.get(i));
-                        }
-*/              // Updates the adapter in order to show the new books from Firebase.
+             // Updates the adapter in order to show the new books from Firebase.
                 mAdapter.notifyDataSetChanged();
-// ACTUALMENTE FUNCIONA:
-// ADICION DE LIBROS DESDE 0 --> OK
-// CAMBIO DE ESTADO(REINICIO ACTIVIDAD) --> OK
-// ADICION DE LIBROS CON APP APAGADA --> OK
-// ADICION DE LIBROS CON APP EJECUTANDOSE --> onDataChange 4 veces
-// MODIFICACION LIBROS CON APP APAGADA --> OK
-// MODIFICACION LIBROS CON APP EJECUTANDOSE --> se lanza onDataChange() 4 veces
-// FALTA PROBAR: BORRADO DE LIBROS
-// FIX: POR QUÉ SE DUPLICA onDataChange?
-// CHANGE: UNA VEZ FUNCIONE, INTENTAR IMPLEMENTAR UN ALGORITMO MÁS RÁPIDO.
-                /*for(BookContent.BookItem bookFromServer: BookContent.ITEMS) {
-                    // If the book from the server does not exist in the local ddbb, adds to it.
-                    if (!BookContent.exists(bookFromServer)) {
-                        Log.d(d, "libro: " + bookFromServer.getTitle() + " NO existe. Se añade a la bbdd local.");
-                        // Adds the book to the local database.
-                        BookContent.BookItem bookFromDDBB = new BookContent.BookItem(
-                                bookFromServer.getIdentificator(),
-                                bookFromServer.getAuthor(),
-                                bookFromServer.getDescription(),
-                                bookFromServer.getPublication_date(),
-                                bookFromServer.getTitle(),
-                                bookFromServer.getUrl_image());
-                        bookFromDDBB.save();
-                    }
-                }*/
             }
 
 
@@ -280,12 +217,6 @@ public class BookListActivity extends AppCompatActivity {
             mValues = items;
             mParentActivity = parent;
             mTwoPane = twoPane;
-        }
-
-        public void setItems(List<BookContent.BookItem> items){
-            // TODO: INICIO CODIGO A COMPLETAR
-
-            // FIN CODIGO A COMPLETAR
         }
 
         // We need to override this method in order to accees the current position of the book in the list.
