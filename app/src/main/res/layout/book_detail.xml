@@ -8,13 +8,18 @@
     android:padding="16dp"
     tools:context=".BookDetailFragment">
 
-    <ImageView
-        android:id="@+id/iv_imagen_libro"
-        android:layout_width="112dp"
-        android:layout_height="160dp"
-        android:contentDescription="@string/book_cover"
-        android:scaleType="centerCrop"
-        tools:src="@drawable/portada_libro" />
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/iv_imagen_libro"
+            android:layout_width="112dp"
+            android:layout_height="160dp"
+            android:contentDescription="@string/book_cover"
+            android:scaleType="centerCrop"
+            tools:src="@drawable/portada_libro" />
+    </FrameLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -41,7 +46,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:textSize="22sp"
-            tools:text="descripcion" />
+            tools:text="Description.\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla a elit fringilla, lacinia sem a, lobortis est. Nunc viverra elit ac nisl finibus auctor. Duis aliquam gravida molestie." />
     </LinearLayout>
 
 </LinearLayout>

@@ -4,4 +4,5 @@
     <string name="book_cover">Book cover</string>
     <string name="auth_failed_showing_ddbb">Authentication failed\nShowing local database</string>
     <string name="user_register_with_email">User is registered with email: </string>
+    <string name="error_downloading_data_showing_database">Error downloading data!\\nShowing local database</string>
 </resources>

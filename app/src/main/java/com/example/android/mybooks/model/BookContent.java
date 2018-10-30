@@ -13,8 +13,6 @@ import java.util.Objects;
  */
 public class BookContent {
 
-    public static final String d = "DEBUG_JOSE: ";
-
     // The Firebase reference to download the books.
     public static final String FIREBASE_BOOKS_REFERENCE = "books";
 
@@ -33,25 +31,51 @@ public class BookContent {
         return BookItem.listAll(BookItem.class);
     }
 
+    // Method that updates the local database with the changes done in the server.
     public static void updateLocalDatabase(){
-        List<BookItem> firebaseList = ITEMS;
         List<BookItem> localDatabaseList = getBooks();
-        List<BookItem> addedList = new ArrayList<>(firebaseList);
+        List<BookItem> addedList = new ArrayList<>(ITEMS);
         List<BookItem> deletedList = new ArrayList<>();
 
         for(BookItem book: localDatabaseList){
+            //
             int firebaseIndex = addedList.indexOf(book);
+            // If firebaseindex<0 then the book in the server has been deleted or modified.
             if(firebaseIndex<0){
+                // so we add it to the list of deletedList books.
                 deletedList.add(book);
+            }else{// otherwise the book in the server has not changed so we remove it from addedList
+                addedList.remove(firebaseIndex);
+                // at the end of the loop, addedList will only contain added books in the server.
             }
         }
 
+        // Deletes in the local database all the books deleted and modified in the server.
+        for(BookItem bookFromLocalDatabase: localDatabaseList){
+            for(BookItem bookToDelete: deletedList){
+                // If identificators match, deletes the book
+                if (bookFromLocalDatabase.getIdentificator() == bookToDelete.getIdentificator()) {
+                    bookFromLocalDatabase.delete();
+                }
+            }
+        }
 
+        // Adds to the local database all the books added and modified in the server.
+        for(BookItem bookToAdd: addedList){
+            bookToAdd.save();
+        }
+    }
 
-
-        //List<BookItem> booksFromLocalDatabase = BookItem.listAll(BookItem.class);
-        //booksFromLocalDatabase.removeAll(deletedList);
-        //booksFromLocalDatabase.addAll(addedList);
+    // Shows the local database
+    public static void showLocalDatabase(){
+        // Shows the books from the local database.
+        List<BookContent.BookItem> books = BookContent.getBooks();
+        BookContent.ITEMS.clear();
+        BookContent.ITEM_MAP.clear();
+        for (BookContent.BookItem book : books) {
+            BookContent.ITEMS.add(book);
+            BookContent.ITEM_MAP.put(String.valueOf(book.getIdentificator()), book);
+        }
     }
 
      /**
@@ -129,23 +153,6 @@ public class BookContent {
                     Objects.equals(mPublicationDate, bookItem.mPublicationDate) &&
                     Objects.equals(mTitle, bookItem.mTitle) &&
                     Objects.equals(mUrlImage, bookItem.mUrlImage);
-        }
-
-        public boolean compareTo(Object o){
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            BookItem bookItem = (BookItem) o;
-            return mIdentificator == bookItem.mIdentificator &&
-                    Objects.equals(mAuthor, bookItem.mAuthor) &&
-                    Objects.equals(mDescription, bookItem.mDescription) &&
-                    Objects.equals(mPublicationDate, bookItem.mPublicationDate) &&
-                    Objects.equals(mTitle, bookItem.mTitle) &&
-                    Objects.equals(mUrlImage, bookItem.mUrlImage);
-        }
-
-        @Override
-        public int hashCode() {
-            return 0;
         }
     }// End class BookItem
 }// End class BookContent

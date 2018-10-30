@@ -1,7 +1,6 @@
 package com.example.android.mybooks;
 
 import com.example.android.mybooks.model.BookContent;
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,13 +11,11 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.facebook.stetho.Stetho;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -31,11 +28,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
-
 import java.util.List;
 import java.util.Map;
-
-import static com.example.android.mybooks.model.BookContent.d;
 
 /**
  * An activity representing a list of Books. This activity has different presentations for handset and tablet-size devices.
@@ -61,9 +55,8 @@ public class BookListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_book_list);
-
+        //this statement helps us debug the local database
         Stetho.initializeWithDefaults(this);
-
         initToolbar();
         initFab();
         isTwoPane();
@@ -118,19 +111,19 @@ public class BookListActivity extends AppCompatActivity {
                 } else {
                     // If sign in fails, show local database instead and notify the user.
                     Toast.makeText(BookListActivity.this, getString(R.string.auth_failed_showing_ddbb), Toast.LENGTH_LONG).show();
-                    //TODO: show local database if exists.
+                    BookContent.showLocalDatabase();
+                    // Updates the adapter in order to show the new books from Firebase.
+                    updateAdapter();
                 }
             }
         });
     }
     private void downloadData(){
-        Log.d(d, "se ejecuta la funcion downloadData()");
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         final DatabaseReference dbRef = database.getReference(BookContent.FIREBASE_BOOKS_REFERENCE);
         dbRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                Log.d(d, "se lanza el evento onDataChange()");
 
                 // If there is any change in data on the server, downloads a map with the keys and corresponding books
                 GenericTypeIndicator<Map<String, BookContent.BookItem>> t = new GenericTypeIndicator<Map<String, BookContent.BookItem>>() {};
@@ -141,7 +134,6 @@ public class BookListActivity extends AppCompatActivity {
                     BookContent.ITEM_MAP.clear();
 
                     for (Map.Entry<String, BookContent.BookItem> entry : map.entrySet()) {
-                        Log.d(d, entry.getKey() + ": " + entry.getValue().getTitle());
                         BookContent.BookItem bookFromServer = entry.getValue();
                         bookFromServer.setIdentificator(Integer.parseInt(entry.getKey()));
                         // assign the books to our list (BookContent.ITEMS)
@@ -149,33 +141,27 @@ public class BookListActivity extends AppCompatActivity {
                         // assign the keys and books to our map (BookContent.ITEM_MAP)
                         BookContent.ITEM_MAP.put(entry.getKey(),entry.getValue());
                     }
+                    BookContent.updateLocalDatabase();
+                    updateAdapter();
                 }
-                BookContent.updateLocalDatabase();
-
-             // Updates the adapter in order to show the new books from Firebase.
-                mAdapter.notifyDataSetChanged();
             }
 
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.d(d, "se lanza el evento onCancelled()");
-                Log.d(d,databaseError.getMessage());
-                Toast.makeText(BookListActivity.this, "Error downloading data!", Toast.LENGTH_LONG).show();
-                // Shows the books from the local database.
-                List<BookContent.BookItem> books = BookContent.getBooks();
-                BookContent.ITEMS.clear();
-                BookContent.ITEM_MAP.clear();
-                for (BookContent.BookItem book : books) {
-                    BookContent.ITEMS.add(book);
-                    BookContent.ITEM_MAP.put(String.valueOf(book.getIdentificator()), book);
-                }
-                // Updates the adapter in order to show the new books from the local database.
-                mAdapter.notifyDataSetChanged();
+                Toast.makeText(BookListActivity.this, getString(R.string.error_downloading_data_showing_database), Toast.LENGTH_LONG).show();
+                // Shows the local database if there is any issue with the server.
+                BookContent.showLocalDatabase();
+                updateAdapter();
             }
         });
 
     }
+    // Updates the adapter in order to show the books from the server or de local database.
+    private void updateAdapter(){
+        mAdapter.notifyDataSetChanged();
+    }
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Create the adapter who manages the insertion of books in the list.
@@ -184,6 +170,7 @@ public class BookListActivity extends AppCompatActivity {
         // constants used to swap cardView colors.
         private static final int LAYOUT_PAR = 0;
         private static final int LAYOUT_IMPAR = 1;
+
         private final BookListActivity mParentActivity;
         private final List<BookContent.BookItem> mValues;
         private final boolean mTwoPane;
@@ -262,7 +249,7 @@ public class BookListActivity extends AppCompatActivity {
 
 
         //////////////////////////////////////////////////
-        // Provides a reference to each of the views within an item.
+        // Class that provides a reference to each of the views within an item.
         // Used as views cache for a faster access.
         class ViewHolder extends RecyclerView.ViewHolder {
             final TextView mTituloView;
@@ -275,6 +262,4 @@ public class BookListActivity extends AppCompatActivity {
             }
         }//End class ViewHolder
     }//End class SimpleItemRecyclerViewAdapter
-
-
 }//End class BookListActivity
