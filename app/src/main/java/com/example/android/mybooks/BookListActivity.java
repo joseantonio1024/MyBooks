@@ -26,7 +26,10 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -39,13 +42,14 @@ public class BookListActivity extends AppCompatActivity {
     // Whether or not the activity is in two-pane mode, i.e. running on a tablet device. */
     private boolean mTwoPane;
 
+    // Adapter that will show the list of books.
     private SimpleItemRecyclerViewAdapter mAdapter;
 
-    // object to authenticate users.
+    // Object to authenticate users.
     private FirebaseAuth mAuth;
 
-    // variables with the identification of a database user.
-    // it would be better to convert them to local, but we put them here for the purpose of clarity.
+    // Variables with the identification of a database user.
+    // It would be better to convert them to local, but we put them here for the purpose of clarity.
     private String email = "jose@email.es";
     private String password = "123456";
 
@@ -53,7 +57,7 @@ public class BookListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_book_list);
-        //this statement helps us debug the local database
+        // This statement helps us debug the local database
         Stetho.initializeWithDefaults(this);
         //BookContent.BookItem.deleteAll(BookContent.BookItem.class);
         initToolbar();
@@ -122,22 +126,29 @@ public class BookListActivity extends AppCompatActivity {
         DatabaseReference dbRef = database.getReference(BookContent.FIREBASE_BOOKS_REFERENCE);
         dbRef.addValueEventListener(new ValueEventListener() {
             @Override
+            // Called if there is any change in the data on the server
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                // Clear the list and map in order to fill them again
+                // Gets the books from the server as an array of types BookItem.
+                GenericTypeIndicator<ArrayList<BookContent.BookItem>> t = new GenericTypeIndicator<ArrayList<BookContent.BookItem>>() {};
+                ArrayList<BookContent.BookItem> booksFromServer = dataSnapshot.getValue(t);
+
+                // Clears the global list and map in order to fill them again because there has been changes in the server.
                 BookContent.ITEMS.clear();
                 BookContent.ITEM_MAP.clear();
 
-                for(DataSnapshot snapshot: dataSnapshot.getChildren()){
-                    // Assign data to a book
-                    BookContent.BookItem bookItem = snapshot.getValue(BookContent.BookItem.class);
-                    // Assign identificator to a book
-                    String id = snapshot.getKey();
-                    bookItem.setIdentificator(Integer.parseInt(id));
-                    // Map the book with its identificator
-                    BookContent.ITEM_MAP.put(id, bookItem);
-                    BookContent.ITEMS.add(bookItem);
+                if(booksFromServer != null) {
+                    // Fills 'ITEMS' with all the books from the server Firebase
+                    for (BookContent.BookItem bookFromServer : booksFromServer) {
+                        if(bookFromServer != null){
+                            // identificator won't be used, so we initialize it to zero.
+                            bookFromServer.setIdentificator(0);
+                            BookContent.ITEMS.add(bookFromServer);
+                            BookContent.ITEM_MAP.put(bookFromServer.getTitle(), bookFromServer);
+                        }
+                    }
                 }
                 BookContent.updateLocalDatabase();
+                // Notifies the adapter to reload the data.
                 mAdapter.notifyDataSetChanged();
             }
 
@@ -146,6 +157,7 @@ public class BookListActivity extends AppCompatActivity {
                 Toast.makeText(BookListActivity.this, getString(R.string.error_downloading_data_showing_database), Toast.LENGTH_LONG).show();
                 // Shows the local database if there is any issue with the server.
                 BookContent.showLocalDatabase();
+                // Notifies the adapter to reload the data.
                 mAdapter.notifyDataSetChanged();
             }
         });
@@ -171,14 +183,14 @@ public class BookListActivity extends AppCompatActivity {
                 BookContent.BookItem item = (BookContent.BookItem) view.getTag();
                 if (mTwoPane) {
                     Bundle arguments = new Bundle();
-                    arguments.putString(BookDetailFragment.ARG_ITEM_ID, String.valueOf(item.getIdentificator()));
+                    arguments.putString(BookDetailFragment.ARG_ITEM_ID, item.getTitle());
                     BookDetailFragment fragment = new BookDetailFragment();
                     fragment.setArguments(arguments);
                     mParentActivity.getSupportFragmentManager().beginTransaction().replace(R.id.book_detail_container, fragment).commit();
                 } else {
                     Context context = view.getContext();
                     Intent intent = new Intent(context, BookDetailActivity.class);
-                    intent.putExtra(BookDetailFragment.ARG_ITEM_ID, String.valueOf(item.getIdentificator()));
+                    intent.putExtra(BookDetailFragment.ARG_ITEM_ID, item.getTitle());
                     context.startActivity(intent);
                 }
             }

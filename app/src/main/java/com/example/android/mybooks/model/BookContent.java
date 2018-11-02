@@ -39,13 +39,13 @@ public class BookContent {
 
         for(BookItem book: localDatabaseList){
             //
-            int firebaseIndex = addedList.indexOf(book);
-            // If firebaseindex<0 then the book in the server has been deleted or modified.
-            if(firebaseIndex<0){
-                // so we add it to the list of deletedList books.
+            int index = addedList.indexOf(book);
+            // If index<0 the book in the server has been deleted or modified.
+            if(index<0){
+                // so we add it to deletedList books.
                 deletedList.add(book);
             }else{// otherwise the book in the server has not changed so we remove it from addedList
-                addedList.remove(firebaseIndex);
+                addedList.remove(index);
                 // at the end of the loop, addedList will only contain added books in the server.
             }
         }
@@ -53,8 +53,8 @@ public class BookContent {
         // Deletes in the local database all the books deleted and modified in the server.
         for(BookItem bookFromLocalDatabase: localDatabaseList){
             for(BookItem bookToDelete: deletedList){
-                // If identificators match, deletes the book
-                if (bookFromLocalDatabase.getIdentificator() == bookToDelete.getIdentificator()) {
+                // If titles match, deletes the book.
+                if (bookFromLocalDatabase.getTitle() == bookToDelete.getTitle()) {
                     bookFromLocalDatabase.delete();
                 }
             }
@@ -66,9 +66,8 @@ public class BookContent {
         }
     }
 
-    // Shows the local database
+    // Shows the books from the local database.
     public static void showLocalDatabase(){
-        // Shows the books from the local database.
         List<BookContent.BookItem> books = BookContent.getBooks();
         BookContent.ITEMS.clear();
         BookContent.ITEM_MAP.clear();
@@ -143,16 +142,21 @@ public class BookContent {
         }
 
         @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            BookItem bookItem = (BookItem) o;
-            return mIdentificator == bookItem.mIdentificator &&
-                    Objects.equals(mAuthor, bookItem.mAuthor) &&
-                    Objects.equals(mDescription, bookItem.mDescription) &&
-                    Objects.equals(mPublicationDate, bookItem.mPublicationDate) &&
-                    Objects.equals(mTitle, bookItem.mTitle) &&
-                    Objects.equals(mUrlImage, bookItem.mUrlImage);
+        public boolean equals(Object object) {
+            if (this == object) return true;
+            if (object == null || getClass() != object.getClass()) return false;
+            BookItem bookItem = (BookItem) object;
+            return  (mIdentificator == bookItem.mIdentificator) &&
+                    (Objects.equals(mAuthor, bookItem.mAuthor)) &&
+                    (Objects.equals(mDescription, bookItem.mDescription)) &&
+                    (Objects.equals(mPublicationDate, bookItem.mPublicationDate)) &&
+                    (Objects.equals(mTitle, bookItem.mTitle)) &&
+                    (Objects.equals(mUrlImage, bookItem.mUrlImage));
+        }
+
+        @Override
+         public int hashCode(){
+            return Objects.hash(mAuthor,mDescription,mPublicationDate,mTitle,mUrlImage);
         }
     }// End class BookItem
 }// End class BookContent
