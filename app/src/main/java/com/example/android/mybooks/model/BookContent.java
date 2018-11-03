@@ -31,51 +31,8 @@ public class BookContent {
         return BookItem.listAll(BookItem.class);
     }
 
-    // Method that updates the local database with the changes done in the server.
-    public static void updateLocalDatabase(){
-        List<BookItem> localDatabaseList = getBooks();
-        List<BookItem> addedList = new ArrayList<>(ITEMS);
-        List<BookItem> deletedList = new ArrayList<>();
 
-        for(BookItem book: localDatabaseList){
-            //
-            int index = addedList.indexOf(book);
-            // If index<0 the book in the server has been deleted or modified.
-            if(index<0){
-                // so we add it to deletedList books.
-                deletedList.add(book);
-            }else{// otherwise the book in the server has not changed so we remove it from addedList
-                addedList.remove(index);
-                // at the end of the loop, addedList will only contain added books in the server.
-            }
-        }
 
-        // Deletes in the local database all the books deleted and modified in the server.
-        for(BookItem bookFromLocalDatabase: localDatabaseList){
-            for(BookItem bookToDelete: deletedList){
-                // If titles match, deletes the book.
-                if (bookFromLocalDatabase.getTitle() == bookToDelete.getTitle()) {
-                    bookFromLocalDatabase.delete();
-                }
-            }
-        }
-
-        // Adds to the local database all the books added and modified in the server.
-        for(BookItem bookToAdd: addedList){
-            bookToAdd.save();
-        }
-    }
-
-    // Shows the books from the local database.
-    public static void showLocalDatabase(){
-        List<BookContent.BookItem> books = BookContent.getBooks();
-        BookContent.ITEMS.clear();
-        BookContent.ITEM_MAP.clear();
-        for (BookContent.BookItem book : books) {
-            BookContent.ITEMS.add(book);
-            BookContent.ITEM_MAP.put(String.valueOf(book.getIdentificator()), book);
-        }
-    }
 
      /**
      * Esta clase representa un libro.

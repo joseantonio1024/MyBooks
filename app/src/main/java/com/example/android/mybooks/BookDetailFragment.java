@@ -54,7 +54,6 @@ public class BookDetailFragment extends Fragment {
         }
 
         View rootView = inflater.inflate(R.layout.book_detail, container, false);
-        // TODO: Mirar por qué la descripción no se muestra hasta el fondo de la pantalla.
         // Shows book details.
         if (mItem != null) {
             ((TextView) rootView.findViewById(R.id.tv_autor)).setText(mItem.getAuthor());

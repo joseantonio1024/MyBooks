@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -28,7 +29,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,6 +48,9 @@ public class BookListActivity extends AppCompatActivity {
     // Object to authenticate users.
     private FirebaseAuth mAuth;
 
+    // Indicates wether the user is signed or not.
+    private boolean mUserSigned = false;
+
     // Variables with the identification of a database user.
     // It would be better to convert them to local, but we put them here for the purpose of clarity.
     private String email = "jose@email.es";
@@ -65,6 +68,7 @@ public class BookListActivity extends AppCompatActivity {
         isTwoPane();
         initRecyclerView();
         signin(email,password);
+        registerSwipeRefreshLayout();
     }//End onCreate()
 
     private void initToolbar(){
@@ -72,6 +76,7 @@ public class BookListActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         toolbar.setTitle(getTitle());
     }
+
     private void initFab(){
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -81,6 +86,7 @@ public class BookListActivity extends AppCompatActivity {
             }
         });
     }
+
     private void isTwoPane(){
         if (findViewById(R.id.book_detail_container) != null) {
             // The detail container view will be present only in the large-screen layouts (res/values-w900dp).
@@ -88,6 +94,7 @@ public class BookListActivity extends AppCompatActivity {
             mTwoPane = true;
         }
     }
+
     private void initRecyclerView(){
         View recyclerView = findViewById(R.id.book_list);
         assert recyclerView != null;
@@ -98,70 +105,148 @@ public class BookListActivity extends AppCompatActivity {
         // attach mAdapter to recyclerView for populate data
         ((RecyclerView) recyclerView).setAdapter(mAdapter);
     }
+
     private void signin(String email, String password){
         // initialize FirebaseAuth instance.
         mAuth = FirebaseAuth.getInstance();
-
         // sign in with email and password :)
         mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
-                if (task.isSuccessful()) {
-                    // If sign in is successfull, download data from Firebase.
+                if (task.isSuccessful()) {// If sign in is successful.
+                    mUserSigned = true;
                     FirebaseUser user = mAuth.getCurrentUser();
                     Toast.makeText(BookListActivity.this,getString(R.string.user_register_with_email) + user.getEmail(),Toast.LENGTH_SHORT).show();
-                    downloadDataFromServer();
-                } else {
-                    // If sign in fails, show local database instead and notify the user.
-                    Toast.makeText(BookListActivity.this, getString(R.string.auth_failed_showing_ddbb), Toast.LENGTH_LONG).show();
-                    BookContent.showLocalDatabase();
-                    // Updates the adapter in order to show the books from local database
+                } else {// If sign in fails.
+                    mUserSigned = false;
+                    Toast.makeText(BookListActivity.this, getString(R.string.auth_failed), Toast.LENGTH_SHORT).show();
+                }
+                showData();
+            }
+        });
+    }
+
+    private void showData(){
+        if(mUserSigned){ // If user is signed in, download data from Firebase.
+
+            FirebaseDatabase database = FirebaseDatabase.getInstance();
+            DatabaseReference dbRef = database.getReference(BookContent.FIREBASE_BOOKS_REFERENCE);
+            dbRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                // Called if there is any change in the data on the server
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    downloadDataFromServer(dataSnapshot);
+                    // Updates the adapter in order to show the books. It is updated here because this method
+                    // is called in another thread and the adapter must be updated after the data is downloaded.
                     mAdapter.notifyDataSetChanged();
                 }
-            }
-        });
-    }
-    private void downloadDataFromServer(){
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference dbRef = database.getReference(BookContent.FIREBASE_BOOKS_REFERENCE);
-        dbRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            // Called if there is any change in the data on the server
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                // Gets the books from the server as an array of types BookItem.
-                GenericTypeIndicator<ArrayList<BookContent.BookItem>> t = new GenericTypeIndicator<ArrayList<BookContent.BookItem>>() {};
-                ArrayList<BookContent.BookItem> booksFromServer = dataSnapshot.getValue(t);
-
-                // Clears the global list and map in order to fill them again because there has been changes in the server.
-                BookContent.ITEMS.clear();
-                BookContent.ITEM_MAP.clear();
-
-                if(booksFromServer != null) {
-                    // Fills 'ITEMS' with all the books from the server Firebase
-                    for (BookContent.BookItem bookFromServer : booksFromServer) {
-                        if(bookFromServer != null){
-                            // identificator won't be used, so we initialize it to zero.
-                            bookFromServer.setIdentificator(0);
-                            BookContent.ITEMS.add(bookFromServer);
-                            BookContent.ITEM_MAP.put(bookFromServer.getTitle(), bookFromServer);
-                        }
-                    }
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    Toast.makeText(BookListActivity.this, getString(R.string.error_downloading_data), Toast.LENGTH_SHORT).show();
+                    // If there is any issue with the server, shows the local database instead.
+                    showLocalDatabase();
+                    // Updates the adapter in order to show the books. It is updated here because this method
+                    // is called in another thread and the adapter must be updated after the data is downloaded.
+                    mAdapter.notifyDataSetChanged();
                 }
-                BookContent.updateLocalDatabase();
-                // Notifies the adapter to reload the data.
-                mAdapter.notifyDataSetChanged();
+            });
+        }else{ // If user is not signed in, show data from the local database
+            Toast.makeText(this, "User is not signed in", Toast.LENGTH_SHORT).show();
+            showLocalDatabase();
+            // Updates the adapter in order to show the books
+            mAdapter.notifyDataSetChanged();
+        }
+
+    }
+
+    private void downloadDataFromServer(@NonNull DataSnapshot dataSnapshot) {
+        // Gets the books from the server as an array of types BookItem.
+        GenericTypeIndicator<ArrayList<BookContent.BookItem>> t = new GenericTypeIndicator<ArrayList<BookContent.BookItem>>() {};
+        ArrayList<BookContent.BookItem> booksFromServer = dataSnapshot.getValue(t);
+
+        // Clears the global list and map in order to fill them again because there has been changes in the server.
+        BookContent.ITEMS.clear();
+        BookContent.ITEM_MAP.clear();
+
+        if (booksFromServer != null) {
+            Toast.makeText(this, "Downloading books", Toast.LENGTH_SHORT).show();
+            // Fills 'ITEMS' with all the books from the server Firebase
+            for (BookContent.BookItem bookFromServer : booksFromServer) {
+                if (bookFromServer != null) {// if book is null (because it has been deleted), skip it.
+                    // identificator won't be used, so we initialize it to zero.
+                    bookFromServer.setIdentificator(0);
+                    BookContent.ITEMS.add(bookFromServer);
+                    BookContent.ITEM_MAP.put(bookFromServer.getTitle(), bookFromServer);
+                }
             }
+        }
+        // Updates the local database with the list downloaded from server
+        updateLocalDatabase();
+    }
+
+    // Method that updates the local database with the changes done in the server.
+    public void updateLocalDatabase(){
+        Toast.makeText(this, "Updating local Database", Toast.LENGTH_SHORT).show();
+        List<BookContent.BookItem> localDatabaseList = BookContent.getBooks();
+        List<BookContent.BookItem> addedList = new ArrayList<>(BookContent.ITEMS);
+        List<BookContent.BookItem> deletedList = new ArrayList<>();
+
+        for(BookContent.BookItem book: localDatabaseList){
+            //
+            int index = addedList.indexOf(book);
+            // If index<0 the book in the server has been deleted or modified.
+            if(index<0){
+                // so we add it to deletedList books.
+                deletedList.add(book);
+            }else{// otherwise the book in the server has not changed so we remove it from addedList
+                addedList.remove(index);
+                // at the end of the loop, addedList will only contain added books in the server.
+            }
+        }
+
+        // Deletes in the local database all the books deleted and modified in the server.
+        for(BookContent.BookItem bookFromLocalDatabase: localDatabaseList){
+            for(BookContent.BookItem bookToDelete: deletedList){
+                // If titles match, deletes the book.
+                if (bookFromLocalDatabase.getTitle().equals(bookToDelete.getTitle())) {
+                    bookFromLocalDatabase.delete();
+                }
+            }
+        }
+
+        // Adds to the local database all the books added and modified in the server.
+        for(BookContent.BookItem bookToAdd: addedList){
+            bookToAdd.save();
+        }
+    }
+
+    // Shows books from local database.
+    public void showLocalDatabase(){
+        Toast.makeText(this,"Showing books from local Database",Toast.LENGTH_SHORT).show();
+        List<BookContent.BookItem> books = BookContent.getBooks();
+        BookContent.ITEMS.clear();
+        BookContent.ITEM_MAP.clear();
+        for (BookContent.BookItem book : books) {
+            BookContent.ITEMS.add(book);
+            BookContent.ITEM_MAP.put(book.getTitle(), book);
+        }
+    }
+
+    private void registerSwipeRefreshLayout(){
+        final SwipeRefreshLayout swipeContainer = findViewById(R.id.swipe_container);
+        swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener(){
 
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Toast.makeText(BookListActivity.this, getString(R.string.error_downloading_data_showing_database), Toast.LENGTH_LONG).show();
-                // Shows the local database if there is any issue with the server.
-                BookContent.showLocalDatabase();
-                // Notifies the adapter to reload the data.
-                mAdapter.notifyDataSetChanged();
+            public void onRefresh() {
+                showData();
+                swipeContainer.setRefreshing(false);
+                //TODO: quitar el toast una vez testeada la app.
+                Toast.makeText(BookListActivity.this, "List refreshed", Toast.LENGTH_SHORT).show();
             }
         });
+
     }
+
 
 
 
@@ -195,6 +280,7 @@ public class BookListActivity extends AppCompatActivity {
                 }
             }
         };
+
 
         /**
          * Overloaded constructor
