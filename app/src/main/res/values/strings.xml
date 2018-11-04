@@ -5,4 +5,7 @@
     <string name="auth_failed">Authentication failed</string>
     <string name="user_register_with_email">User is registered with email: </string>
     <string name="error_downloading_data">Error downloading data!</string>
+    <string name="user_is_not_signedin">User is not signed in</string>
+    <string name="downloading_books">Downloading books</string>
+    <string name="showing_books_from_local_database">Showing books from local Database</string>
 </resources>
