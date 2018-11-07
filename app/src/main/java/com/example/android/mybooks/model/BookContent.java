@@ -16,10 +16,10 @@ public class BookContent {
     // The Firebase reference to download the books.
     public static final String FIREBASE_BOOKS_REFERENCE = "books";
 
-    // An array (book) items.
+    // An array of Books
     public static final List<BookItem> ITEMS = new ArrayList<>();
 
-    // A map (book) items, by ID.
+    // A map of books, by Title.
     public static final Map<String, BookItem> ITEM_MAP = new HashMap<>();
 
     /**
@@ -31,7 +31,27 @@ public class BookContent {
         return BookItem.listAll(BookItem.class);
     }
 
+    /**
+     * A helper method that checks if a bookFromServer exists in the local database
+     * @param bookFromServer a book from the server
+     * @return true if the book exists in the local database. False otherwise.
+     */
+    public static boolean exists(BookItem bookFromServer){
+        // Gets the local book's database.
+        List<BookItem> booksFromLocalDatabase = getBooks();
+        // If the local database is empty, return 'false' in order to fill it with the first book.
+        if(booksFromLocalDatabase.isEmpty())
+            return false;
 
+        // Compares all the books from the local database with the book downloaded from firebase.
+        for(BookItem bookFromDatabase: booksFromLocalDatabase) {
+            // If titles match, the book exists on the local database.
+            if (bookFromDatabase.getTitle().equals(bookFromServer.getTitle())) {
+                return true;
+            }
+        }
+        return false; // The book doesn't exist.
+    }
 
 
      /**
