@@ -58,6 +58,7 @@ public class BookListActivity extends AppCompatActivity {
         initRecyclerView();
         signin();
         registerSwipeRefreshLayout();
+
     }//End onCreate()
 
     private void initToolbar(){

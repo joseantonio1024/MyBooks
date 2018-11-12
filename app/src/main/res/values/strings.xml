@@ -8,4 +8,12 @@
     <string name="user_is_not_signedin">User is not signed in</string>
     <string name="downloading_books">Downloading books</string>
     <string name="no_books_in_ddbb">There are no books in the local database</string>
+
+    <string name="default_notification_channel_id" translatable="false">fcm default channel</string>
+
+    <!--
+    This is the name that users will see when interacting with this channel.
+    It should describe the category of notifications that will be sent through this channel
+ -->
+    <string name="default_notification_channel_name" translatable="true">News</string>
 </resources>
