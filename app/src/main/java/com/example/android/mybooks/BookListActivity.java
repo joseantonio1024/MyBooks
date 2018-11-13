@@ -16,11 +16,14 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.facebook.stetho.Stetho;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -33,6 +36,7 @@ import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
+
 
 /**
  * An activity representing a list of Books. This activity has different presentations for handset and tablet-size devices.
@@ -56,8 +60,13 @@ public class BookListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_book_list);
 
+        // This statement helps us debug the local database
+        Stetho.initializeWithDefaults(this);
+        //BookContent.BookItem.deleteAll(BookContent.BookItem.class);
+
         createNotificationChannel();
         initToolbar();
+        getNotificationActionButtons();
         initFab();
         isTwoPane();
         initRecyclerView();
@@ -83,6 +92,24 @@ public class BookListActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setTitle(getTitle());
+    }
+
+    private void getNotificationActionButtons(){
+        if (getIntent() != null && getIntent().getAction() != null) {
+            if (getIntent().getAction().equalsIgnoreCase(Intent.ACTION_DELETE)) {
+                // Action delete book from the received notification.
+                List<BookContent.BookItem> books = BookContent.getBooks();
+                //BookContent.BookItem bookToDelete = books.get(10);
+                //bookToDelete.delete();
+                Toast.makeText(this, "Acción eliminar", Toast.LENGTH_SHORT).show();
+            } else if (getIntent().getAction().equalsIgnoreCase(Intent.ACTION_VIEW)) {
+                // Action view details from the received notification.
+                //int numero = getIntent().getExtras().getInt(Intent.EXTRA_TEXT);
+                //List<BookContent.BookItem> localDatabaseBooks = BookContent.getBooks();
+                //Log.d("ver_detalles", localDatabaseBooks.get(numero).toString());
+                Toast.makeText(this, "Acción ver", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     private void initFab(){
@@ -133,7 +160,6 @@ public class BookListActivity extends AppCompatActivity {
             }
         });
     }
-
 
     private void downloadBooksFromServer(){
         FirebaseDatabase database = FirebaseDatabase.getInstance();

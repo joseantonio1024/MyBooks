@@ -52,18 +52,24 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
      * @param messageBody FCM message body received.
      */
     private void sendNotification(String messageBody) {
-        Intent intent = new Intent(this, BookListActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
+        Intent intent1 = new Intent(this, BookListActivity.class);
+        intent1.setAction(Intent.ACTION_DELETE);
+        PendingIntent deleteIntent = PendingIntent.getActivity(this,0,intent1,0);
+        Intent intent2 = new Intent(this,BookListActivity.class);
+        intent2.setAction(Intent.ACTION_VIEW);
+        //intent2.putExtra(Intent.EXTRA_TEXT,"10");
+        PendingIntent viewDetailsIntent = PendingIntent.getActivity(this, 1, intent2, 0);
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, getString(R.string.default_notification_channel_id))
                 .setSmallIcon(R.drawable.ic_stat_ic_notification)
                 .setContentTitle("Ejemplo Firebase")
                 .setContentText(messageBody)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(messageBody))
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
-                .setContentIntent(pendingIntent);
+                .addAction(new NotificationCompat.Action(R.drawable.ic_stat_ic_notification,"borrar libro",deleteIntent))
+                .addAction(R.drawable.ic_stat_ic_notification,"ver detalle libro",viewDetailsIntent);
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
