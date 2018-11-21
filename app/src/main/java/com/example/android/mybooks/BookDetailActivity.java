@@ -27,8 +27,14 @@ public class BookDetailActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own detail action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                Snackbar.make(view, "Deletes this book from the local database if long clicked", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+            }
+        });
+        fab.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                Snackbar.make(view, "!!!Era broma!!!", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                return false;
             }
         });
 

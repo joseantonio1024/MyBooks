@@ -1,7 +1,6 @@
 package com.example.android.mybooks;
 
 import com.example.android.mybooks.model.BookContent;
-
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -22,8 +21,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.facebook.stetho.Stetho;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -36,6 +33,11 @@ import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
+import com.facebook.stetho.Stetho;
+
+import static com.example.android.mybooks.MyFirebaseMessagingService.ACTION_DELETE_BOOK;
+import static com.example.android.mybooks.MyFirebaseMessagingService.ACTION_VIEW_DETAILS;
+import static com.example.android.mybooks.MyFirebaseMessagingService.BOOK_POSITION;
 
 
 /**
@@ -45,7 +47,11 @@ import java.util.List;
  */
 public class BookListActivity extends AppCompatActivity {
 
-    // Whether or not the activity is in two-pane mode, i.e. running on a tablet device. */
+    // global reference to remove the listener in onDestroy()
+    private DatabaseReference dbRef;
+    private ValueEventListener listener;
+
+    // Whether or not the activity is in two-pane mode, i.e. running on a tablet device.
     private boolean mTwoPane;
 
     // Adapter that will show the list of books.
@@ -53,6 +59,9 @@ public class BookListActivity extends AppCompatActivity {
 
     // Object to authenticate users.
     private FirebaseAuth mAuth;
+
+    // A list with the books on the server
+    private static List<BookContent.BookItem> mBooksFromServer;
 
 
     @Override
@@ -62,13 +71,12 @@ public class BookListActivity extends AppCompatActivity {
 
         // This statement helps us debug the local database
         Stetho.initializeWithDefaults(this);
-        //BookContent.BookItem.deleteAll(BookContent.BookItem.class);
 
         createNotificationChannel();
         initToolbar();
-        getNotificationActionButtons();
         initFab();
         isTwoPane();
+        getNotificationActionButtons();
         initRecyclerView();
         signin();
         registerSwipeRefreshLayout();
@@ -94,39 +102,106 @@ public class BookListActivity extends AppCompatActivity {
         toolbar.setTitle(getTitle());
     }
 
-    private void getNotificationActionButtons(){
-        if (getIntent() != null && getIntent().getAction() != null) {
-            if (getIntent().getAction().equalsIgnoreCase(Intent.ACTION_DELETE)) {
-                // Action delete book from the received notification.
-                List<BookContent.BookItem> books = BookContent.getBooks();
-                //BookContent.BookItem bookToDelete = books.get(10);
-                //bookToDelete.delete();
-                Toast.makeText(this, "Acción eliminar", Toast.LENGTH_SHORT).show();
-            } else if (getIntent().getAction().equalsIgnoreCase(Intent.ACTION_VIEW)) {
-                // Action view details from the received notification.
-                //int numero = getIntent().getExtras().getInt(Intent.EXTRA_TEXT);
-                //List<BookContent.BookItem> localDatabaseBooks = BookContent.getBooks();
-                //Log.d("ver_detalles", localDatabaseBooks.get(numero).toString());
-                Toast.makeText(this, "Acción ver", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
     private void initFab(){
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                //TODO: remove this in the production app.
+                Toast.makeText(BookListActivity.this, "Deletes de local database if long clicked", Toast.LENGTH_LONG).show();
+            }
+        });
+        fab.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                //TODO: remove this in the production app.
+                BookContent.BookItem.deleteAll(BookContent.BookItem.class);
+                Snackbar.make(view, "local database deleted", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                return false;
             }
         });
     }
 
     private void isTwoPane(){
-        if (findViewById(R.id.book_detail_container) != null) {
-            // The detail container view will be present only in the large-screen layouts (res/values-w900dp).
-            // If this view is present, then the activity should be in two-pane mode.
-            mTwoPane = true;
+        mTwoPane = findViewById(R.id.book_detail_container) != null;
+    }
+
+    private void getNotificationActionButtons(){
+
+        if (getIntent() != null && getIntent().getAction() != null) {
+            String action = getIntent().getAction();
+
+            if(action.equalsIgnoreCase(ACTION_DELETE_BOOK) || action.equalsIgnoreCase(ACTION_VIEW_DETAILS)) {
+                Log.d("GET_INTENT", getIntent().toString());
+                Log.d("GET_INTENT", action);
+                Log.d("GET_INTENT",getIntent().getStringExtra(BOOK_POSITION));
+
+                // Gets the value of BOOK_POSITION key.
+                String bookPosition = getIntent().getStringExtra(BOOK_POSITION);
+
+                // Try if bookPosition can be converted to an int.
+                try{
+                    int id = Integer.parseInt(bookPosition);
+
+                    // if id is not out of range
+                    if(id>=0 && id<mBooksFromServer.size()){
+                        // Gets the book from the server
+                        BookContent.BookItem bookFromServer = mBooksFromServer.get(id);
+
+                        // bookFromServer can be null if it has been deleted previously. So we check it.
+                        if (bookFromServer != null) {
+                            // Gets the title of the book from the server.
+                            String bookTitle = bookFromServer.getTitle();
+
+                            // Searches in the local database for the book to delete or view details.
+                            BookContent.BookItem bookToDeleteOrViewDetails = BookContent.lookForBookWithTitle(bookTitle);
+                            if (bookToDeleteOrViewDetails != null){
+                                // If the button clicked in the notification was 'DELETE'
+                                if (action.equalsIgnoreCase(ACTION_DELETE_BOOK)) {
+                                    bookToDeleteOrViewDetails.delete();// Deletes the book from the local database.
+                                    Log.d("GET_INTENT", "delete book " + bookToDeleteOrViewDetails.getTitle());
+                                    Toast.makeText(this, "book deleted", Toast.LENGTH_SHORT).show();
+                                    deleteBookFromServer(bookPosition);// Deletes the book from the server.
+                                }
+                                // If the button clicked in the notification was 'VIEW DETAILS'
+                                else if (action.equalsIgnoreCase(ACTION_VIEW_DETAILS)) {
+                                    // View details of the book.
+                                    if (mTwoPane) {
+                                        Log.d("GET_INTENT", "mTwoPane: true");
+                                        Log.d("GET_INTENT", this.toString());
+                                        Bundle arguments = new Bundle();
+                                        arguments.putString(BookDetailFragment.ARG_ITEM_ID, bookToDeleteOrViewDetails.getTitle());
+                                        BookDetailFragment fragment = new BookDetailFragment();
+                                        fragment.setArguments(arguments);
+                                        this.getSupportFragmentManager().beginTransaction().replace(R.id.book_detail_container, fragment).commit();
+                                    } else {
+                                        Log.d("GET_INTENT", "mTwoPane: false");
+                                        Intent intent = new Intent(this, BookDetailActivity.class);
+                                        intent.putExtra(BookDetailFragment.ARG_ITEM_ID, bookToDeleteOrViewDetails.getTitle());
+                                        this.startActivity(intent);
+                                    }
+                                }
+                            }else {
+                                Log.d("GET_INTENT", "Error. El libro indicado no existe en la bbdd");
+                                Toast.makeText(this, "error. El libro indicado no existe en la bbdd", Toast.LENGTH_SHORT).show();
+                            }
+                        }else {
+                            Log.d("GET_INTENT", "Error. El libro indicado no existe en el server");
+                            Toast.makeText(this, "error. El libro indicado no existe en el server", Toast.LENGTH_SHORT).show();
+                        }
+                    }else {
+                        Log.d("GET_INTENT", "Error. index out of range");
+                        Toast.makeText(this, "error. index out of range", Toast.LENGTH_SHORT).show();
+                    }
+                }catch(NumberFormatException e){
+                    Log.d("GET_INTENT", e.getMessage());
+                    Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+
+                // Reset getIntent.getAction in order to not enter this method again when the device is rotated.
+                getIntent().setAction(Intent.ACTION_MAIN);
+                Log.d("GET_INTENT",getIntent().getAction());
+            }
         }
     }
 
@@ -162,31 +237,53 @@ public class BookListActivity extends AppCompatActivity {
     }
 
     private void downloadBooksFromServer(){
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference dbRef = database.getReference(BookContent.FIREBASE_BOOKS_REFERENCE);
-        dbRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            // Called if there is any change in the books on the server
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                Toast.makeText(BookListActivity.this, getString(R.string.downloading_books), Toast.LENGTH_SHORT).show();
-                // Gets the books from the server as an array of types BookItem.
-                GenericTypeIndicator<ArrayList<BookContent.BookItem>> t = new GenericTypeIndicator<ArrayList<BookContent.BookItem>>() {};
-                List<BookContent.BookItem> booksFromServer = dataSnapshot.getValue(t);
-                // If a bookFromServer does not exist in the local database, adds to it.
-                for (BookContent.BookItem book: booksFromServer){
-                    if(!BookContent.exists(book)){
-                        book.save();
+
+        if(listener == null) {
+            dbRef = FirebaseDatabase.getInstance().getReference(BookContent.FIREBASE_BOOKS_REFERENCE);
+
+            listener = dbRef.addValueEventListener(new ValueEventListener() {
+
+                @Override
+                // Called if there is any change in the books on the server
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    Toast.makeText(BookListActivity.this, getString(R.string.downloading_books), Toast.LENGTH_SHORT).show();
+
+                    // Gets the books from the server as an array of types BookItem.
+                    GenericTypeIndicator<ArrayList<BookContent.BookItem>> t = new GenericTypeIndicator<ArrayList<BookContent.BookItem>>() {
+                    };
+                    mBooksFromServer = dataSnapshot.getValue(t);
+
+                    if (mBooksFromServer != null) {
+                        for (BookContent.BookItem book : mBooksFromServer) {
+                            // When a book in the server is deleted, it remains at its position as null.
+                            // But we don't want to store null books in the local database.
+                            if (book != null) {
+                                // If a bookFromServer does not exist in the local database, adds to it.
+                                if (!BookContent.exists(book)) {
+                                    book.save();
+                                }
+                            }
+                        }
                     }
+                    showLocalDatabase();
                 }
-                showLocalDatabase();
-            }
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Toast.makeText(BookListActivity.this, getString(R.string.error_downloading_data), Toast.LENGTH_SHORT).show();
-                // If there is any issue with the server, shows the local database instead.
-                showLocalDatabase();
-            }
-        });
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    Toast.makeText(BookListActivity.this, getString(R.string.error_downloading_data), Toast.LENGTH_SHORT).show();
+                    // If there is any issue with the server, shows the local database instead.
+                    showLocalDatabase();
+                }
+            });
+            Log.d("GET_INTENT", "ValueEventListener added: " + listener.toString());
+            Log.d("GET_INTENT", "valueEventListener added: " + listener.hashCode());
+        }
+    }
+
+    private void deleteBookFromServer(String id){
+        DatabaseReference dbBook = FirebaseDatabase.getInstance().getReference(BookContent.FIREBASE_BOOKS_REFERENCE).child(id);
+        dbBook.removeValue();
+        Log.d("GET_INTENT","deleted book: " + dbBook.toString());
     }
 
     // Shows books from local database.
@@ -218,7 +315,15 @@ public class BookListActivity extends AppCompatActivity {
         });
     }
 
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(dbRef!=null && listener!=null) {
+            dbRef.removeEventListener(listener);
+            Log.d("GET_INTENT","valueEventListener removed: " + listener.toString());
+            Log.d("GET_INTENT","valueEventListener removed: " + listener.hashCode());
+        }
+    }
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

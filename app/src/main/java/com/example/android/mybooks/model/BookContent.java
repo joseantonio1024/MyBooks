@@ -53,6 +53,24 @@ public class BookContent {
         return false; // The book doesn't exist.
     }
 
+    /**
+     * A helper method that checks if there is a book in the local database with the title specified
+     * @param title the title specified
+     * @return the book if exists. Null, otherwise
+     */
+    public static BookItem lookForBookWithTitle(String title){
+        // Gets the local book's database
+        List<BookItem> booksFromLocalDatabase = getBooks();
+
+        // Looks for the book with the title
+        for(BookItem book: booksFromLocalDatabase){
+            if(book.getTitle().equals(title))
+                return book;
+        }
+        // The book does not exist in the local database.
+        return null;
+    }
+
 
      /**
      * Esta clase representa un libro.

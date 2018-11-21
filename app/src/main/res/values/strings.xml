@@ -14,5 +14,9 @@
     <!-- This is the name that users will see when interacting with this channel.
     It should describe the category of notifications that will be sent through this channel -->
     <string name="default_notification_channel_name" translatable="true">Updates</string>
+    <string name="notification_button_delete" translatable="true">delete</string>
+    <string name="notification_button_viewDetails" translatable="true">view details</string>
+    <string name="notification_content_title" translatable="false">Firebase</string>
+    <string name="new_token" translatable="true">New token:</string>
 
 </resources>

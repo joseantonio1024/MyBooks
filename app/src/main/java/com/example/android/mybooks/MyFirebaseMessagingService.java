@@ -8,7 +8,6 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
@@ -16,6 +15,9 @@ import com.google.firebase.messaging.RemoteMessage;
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private static final String TAG = "MyFirebaseMsgService";
+    public static final String BOOK_POSITION = "com.example.android.mybooks.MyFirebaseMessagingService.book_position";
+    public static final String ACTION_DELETE_BOOK = "com.example.android.mybooks.MyFirebaseMessagingService.action_delete_book";
+    public static final String ACTION_VIEW_DETAILS = "com.example.android.mybooks.MyFirebaseMessagingService.action_view_details";
 
     /**
      * Called when message is received.
@@ -34,45 +36,60 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         // messages. For more see: https://firebase.google.com/docs/cloud-messaging/concept-options
         // [END_EXCLUDE]
         Log.d(TAG, "From: " + remoteMessage.getFrom());
-
-        if(remoteMessage.getNotification() != null) {
-            Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
-            sendNotification(remoteMessage.getNotification().getBody());
-        }
+        sendNotification(remoteMessage);
     }
 
     @Override
     public void onNewToken(String string){
-        Log.d(TAG, "New token: " + string);
+        Log.d(TAG, getString(R.string.new_token) + string);
     }
 
     /**
-     * Create and show a simple notification containing the received FCM message.
+     * Create and show a notification containing the received FCM message.
      *
-     * @param messageBody FCM message body received.
+     * @param remoteMessage FCM message received.
      */
-    private void sendNotification(String messageBody) {
-        Intent intent1 = new Intent(this, BookListActivity.class);
-        intent1.setAction(Intent.ACTION_DELETE);
-        PendingIntent deleteIntent = PendingIntent.getActivity(this,0,intent1,0);
-        Intent intent2 = new Intent(this,BookListActivity.class);
-        intent2.setAction(Intent.ACTION_VIEW);
-        //intent2.putExtra(Intent.EXTRA_TEXT,"10");
-        PendingIntent viewDetailsIntent = PendingIntent.getActivity(this, 1, intent2, 0);
+    private void sendNotification(RemoteMessage remoteMessage) {
+        String messageBody = remoteMessage.getNotification().getBody();
+        String bookPosition = remoteMessage.getData().get("book_position");
 
-        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, getString(R.string.default_notification_channel_id))
-                .setSmallIcon(R.drawable.ic_stat_ic_notification)
-                .setContentTitle("Ejemplo Firebase")
-                .setContentText(messageBody)
-                .setStyle(new NotificationCompat.BigTextStyle().bigText(messageBody))
-                .setAutoCancel(true)
-                .setSound(defaultSoundUri)
-                .addAction(new NotificationCompat.Action(R.drawable.ic_stat_ic_notification,"borrar libro",deleteIntent))
-                .addAction(R.drawable.ic_stat_ic_notification,"ver detalle libro",viewDetailsIntent);
+        // Checks if notification contains any data payload.
+        if(bookPosition != null) {
+            Log.d(TAG , "book position we want to delete or view details: " + bookPosition);
 
-        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            // Intent to pass 'delete' action to BookListActivity
+            Intent intent1 = new Intent(this, BookListActivity.class);
+            intent1.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);// Clear back history
+            intent1.setAction(ACTION_DELETE_BOOK);
+            intent1.putExtra(BOOK_POSITION, bookPosition);// Extra with the position of the book we want to delete
+            // Pendind intent that will be launched when the user taps the 'delete' button.
+            PendingIntent deleteIntent = PendingIntent.getActivity(this, 1122, intent1, PendingIntent.FLAG_ONE_SHOT);
 
-        notificationManager.notify(0,notificationBuilder.build());
+            // Intent to pass 'view details' action to BookListActivity
+            Intent intent2 = new Intent(this, BookListActivity.class);
+            intent2.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);// Clear back history
+            intent2.setAction(ACTION_VIEW_DETAILS);
+            intent2.putExtra(BOOK_POSITION, bookPosition);// Extra with the position of the book we want to view details
+            // Pending intent that will be launched when the user taps the 'view details' button.
+            PendingIntent viewDetailsIntent = PendingIntent.getActivity(this, 5566, intent2, PendingIntent.FLAG_ONE_SHOT);
+
+            Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            // Creates the expanded notification with two buttons
+            NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, getString(R.string.default_notification_channel_id))
+                    .setSmallIcon(R.drawable.ic_notification)
+                    .setContentTitle(getString(R.string.notification_content_title))
+                    .setContentText(messageBody)
+                    .setStyle(new NotificationCompat.BigTextStyle().bigText(messageBody))
+                    .setAutoCancel(true)//TODO: no funciona setAutoCancel(true)
+                    .setSound(defaultSoundUri)
+                    .addAction(R.drawable.ic_delete, getString(R.string.notification_button_delete), deleteIntent)
+                    .addAction(R.drawable.ic_view_details, getString(R.string.notification_button_viewDetails), viewDetailsIntent);
+
+            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            // Sets notification id to zero, so all messages from firebase will group together.
+            notificationManager.notify(0, notificationBuilder.build());
+        }else{
+            Log.d(TAG,"Data payload error: " + bookPosition );
+        }
     }
 }
