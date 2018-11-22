@@ -63,15 +63,18 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             intent1.setAction(ACTION_DELETE_BOOK);
             intent1.putExtra(BOOK_POSITION, bookPosition);// Extra with the position of the book we want to delete
             // Pendind intent that will be launched when the user taps the 'delete' button.
-            PendingIntent deleteIntent = PendingIntent.getActivity(this, 1122, intent1, PendingIntent.FLAG_ONE_SHOT);
+
+            PendingIntent deleteIntent = PendingIntent.getActivity(this, 1122, intent1, PendingIntent.FLAG_UPDATE_CURRENT);
 
             // Intent to pass 'view details' action to BookListActivity
             Intent intent2 = new Intent(this, BookListActivity.class);
             intent2.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);// Clear back history
             intent2.setAction(ACTION_VIEW_DETAILS);
             intent2.putExtra(BOOK_POSITION, bookPosition);// Extra with the position of the book we want to view details
-            // Pending intent that will be launched when the user taps the 'view details' button.
-            PendingIntent viewDetailsIntent = PendingIntent.getActivity(this, 5566, intent2, PendingIntent.FLAG_ONE_SHOT);
+            // Pending intent that will be launched when the user taps the 'view details' button. Note the use
+            // Note the use of FLAG_UPDATE_CURRENT for keeping the PendingIntent (if already exists) but replacing
+            // its extra data with what is in this new intent.
+            PendingIntent viewDetailsIntent = PendingIntent.getActivity(this, 5566, intent2, PendingIntent.FLAG_UPDATE_CURRENT);
 
             Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
             // Creates the expanded notification with two buttons

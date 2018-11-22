@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static com.example.android.mybooks.BookListActivity.mBooksFromServer;
+
 /**
  * Helper class for providing content for user interfaces.
  */
@@ -48,6 +50,25 @@ public class BookContent {
             // If titles match, the book exists on the local database.
             if (bookFromDatabase.getTitle().equals(bookFromServer.getTitle())) {
                 return true;
+            }
+        }
+        return false; // The book doesn't exist.
+    }
+
+    /**
+     * A helper method that checks if a bookFromDatabase exists in the server
+     * @param bookFromDatabase a book from the local database
+     * @return true if the book exists in the server. False otherwise.
+     */
+    public static boolean existsInServer(BookItem bookFromDatabase){
+
+        // Compares all the books from firebase with the book in the local database.
+        for(BookItem bookFromServer : mBooksFromServer) {
+            if(bookFromServer != null) {
+                // If titles match, the book exists on the server.
+                if (bookFromDatabase.getTitle().equals(bookFromServer.getTitle())) {
+                    return true;
+                }
             }
         }
         return false; // The book doesn't exist.
