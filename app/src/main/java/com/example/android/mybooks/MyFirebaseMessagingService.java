@@ -15,7 +15,7 @@ import com.google.firebase.messaging.RemoteMessage;
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private static final String TAG = "MyFirebaseMsgService";
-    public static final String BOOK_POSITION = "com.example.android.mybooks.MyFirebaseMessagingService.book_position";
+    public static final String BOOK_ID = "com.example.android.mybooks.MyFirebaseMessagingService.book_position";
     public static final String ACTION_DELETE_BOOK = "com.example.android.mybooks.MyFirebaseMessagingService.action_delete_book";
     public static final String ACTION_VIEW_DETAILS = "com.example.android.mybooks.MyFirebaseMessagingService.action_view_details";
 
@@ -51,17 +51,17 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
      */
     private void sendNotification(RemoteMessage remoteMessage) {
         String messageBody = remoteMessage.getNotification().getBody();
-        String bookPosition = remoteMessage.getData().get("book_position");
+        String bookID = remoteMessage.getData().get("book_position");
 
         // Checks if notification contains any data payload.
-        if(bookPosition != null) {
-            Log.d(TAG , "book position we want to delete or view details: " + bookPosition);
+        if(bookID != null) {
+            Log.d(TAG , "book position we want to delete or view details: " + bookID);
 
             // Intent to pass 'delete' action to BookListActivity
             Intent intent1 = new Intent(this, BookListActivity.class);
             intent1.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);// Clear back history
             intent1.setAction(ACTION_DELETE_BOOK);
-            intent1.putExtra(BOOK_POSITION, bookPosition);// Extra with the position of the book we want to delete
+            intent1.putExtra(BOOK_ID, bookID);// Extra with the position of the book we want to delete
             // Pendind intent that will be launched when the user taps the 'delete' button.
 
             PendingIntent deleteIntent = PendingIntent.getActivity(this, 1122, intent1, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -70,7 +70,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             Intent intent2 = new Intent(this, BookListActivity.class);
             intent2.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);// Clear back history
             intent2.setAction(ACTION_VIEW_DETAILS);
-            intent2.putExtra(BOOK_POSITION, bookPosition);// Extra with the position of the book we want to view details
+            intent2.putExtra(BOOK_ID, bookID);// Extra with the position of the book we want to view details
             // Pending intent that will be launched when the user taps the 'view details' button. Note the use
             // Note the use of FLAG_UPDATE_CURRENT for keeping the PendingIntent (if already exists) but replacing
             // its extra data with what is in this new intent.
@@ -92,7 +92,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             // Sets notification id to zero, so all messages from firebase will group together.
             notificationManager.notify(0, notificationBuilder.build());
         }else{
-            Log.d(TAG,"Data payload error: " + bookPosition );
+            Log.d(TAG,"Data payload error: " + bookID );
         }
     }
 }

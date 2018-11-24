@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
@@ -23,18 +24,13 @@ public class BookDetailActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.detail_toolbar);
         setSupportActionBar(toolbar);
 
+        Log.d("GET_INTENT", "BookDetailActivity: method: onCreate()");
+
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Deletes this book from the local database if long clicked", Snackbar.LENGTH_LONG).setAction("Action", null).show();
-            }
-        });
-        fab.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                Snackbar.make(view, "!!!Era broma!!!", Snackbar.LENGTH_LONG).setAction("Action", null).show();
-                return false;
+                Snackbar.make(view, "Implement with your own action", Snackbar.LENGTH_LONG).setAction("Action", null).show();
             }
         });
 

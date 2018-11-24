@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.example.android.mybooks.BookListActivity.mBooksFromServer;
 
 /**
  * Helper class for providing content for user interfaces.
@@ -52,18 +51,19 @@ public class BookContent {
                 return true;
             }
         }
-        return false; // The book doesn't exist.
+        return false; // The book doesn't exist in the local database.
     }
 
     /**
      * A helper method that checks if a bookFromDatabase exists in the server
      * @param bookFromDatabase a book from the local database
+     * @param booksFromServer a list of books from the server
      * @return true if the book exists in the server. False otherwise.
      */
-    public static boolean existsInServer(BookItem bookFromDatabase){
+    public static boolean existsInServer(BookItem bookFromDatabase, List<BookItem> booksFromServer){
 
         // Compares all the books from firebase with the book in the local database.
-        for(BookItem bookFromServer : mBooksFromServer) {
+        for(BookItem bookFromServer : booksFromServer) {
             if(bookFromServer != null) {
                 // If titles match, the book exists on the server.
                 if (bookFromDatabase.getTitle().equals(bookFromServer.getTitle())) {
@@ -71,7 +71,7 @@ public class BookContent {
                 }
             }
         }
-        return false; // The book doesn't exist.
+        return false; // The book doesn't exist in the server.
     }
 
     /**
