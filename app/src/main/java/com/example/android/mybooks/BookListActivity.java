@@ -49,7 +49,7 @@ public class BookListActivity extends AppCompatActivity {
     // Reference to the server database.
     private DatabaseReference dbRef;
 
-    // Global reference to remove the listener in onDestroy()
+    // Global reference to remove the listener in onDestroy() and onRefreshListener().
     private ValueEventListener listener;
 
     // Whether or not the activity is in two-pane mode, i.e. running on a tablet device.
@@ -91,6 +91,7 @@ public class BookListActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         Log.d("GET_INTENT","onDestroy()");
+        // Removes the listener in order to save resources.
         removeValueEventListenerFromFirebase();
     }
 
@@ -218,7 +219,6 @@ public class BookListActivity extends AppCompatActivity {
 
                 // Reset getIntent.getAction in order to not enter this method again when the device is rotated.
                 getIntent().setAction(Intent.ACTION_MAIN);
-                Log.d("GET_INTENT",getIntent().getAction());
             }
         }
     }
@@ -253,7 +253,7 @@ public class BookListActivity extends AppCompatActivity {
                         downloadBooks();
                     } else {// Otherwise, shows data from local database.
                         Toast.makeText(BookListActivity.this, getString(R.string.auth_failed), Toast.LENGTH_SHORT).show();
-                        Log.d("GET_INTENT", "registro: wrong");
+                        Log.d("GET_INTENT", "registro: error");
                     }
                 }
             });
@@ -265,8 +265,8 @@ public class BookListActivity extends AppCompatActivity {
 
     private void downloadBooks() {
         Log.d("GET_INTENT", "METHOD: downloadBooks()");
-        if (mAuth.getCurrentUser() != null) {
-            if (listener == null) {
+        if (mAuth.getCurrentUser() != null) { // If the user is registered.
+            if (listener == null) { // If the listener is not yet registered or the previous one was removed, adds another one.
                 dbRef = FirebaseDatabase.getInstance().getReference(BookContent.FIREBASE_BOOKS_REFERENCE);
                 listener = dbRef.addValueEventListener(new ValueEventListener() {
 
@@ -277,6 +277,9 @@ public class BookListActivity extends AppCompatActivity {
                         // Gets the books from the server as an array of types BookItem.
                         GenericTypeIndicator<ArrayList<BookContent.BookItem>> t = new GenericTypeIndicator<ArrayList<BookContent.BookItem>>() {};
                         Toast.makeText(BookListActivity.this, getString(R.string.downloading_books), Toast.LENGTH_SHORT).show();
+                        // mBooksFromServer holds the list of books from the server
+                        // We made it static because we need its value in the method getNotificationActionButtons() which is called
+                        // in a new instance of BooklistActivity.
                         mBooksFromServer = dataSnapshot.getValue(t);
                         Log.d("GET_INTENT", "books downloaded correctly");
                         sincronizeDatabases();
@@ -286,7 +289,7 @@ public class BookListActivity extends AppCompatActivity {
                     public void onCancelled(@NonNull DatabaseError databaseError) {
                         Toast.makeText(BookListActivity.this, getString(R.string.error_downloading_data), Toast.LENGTH_SHORT).show();
                         // If there is any issue with the server, shows the local database instead.
-                        Log.d("GET_INTENT", "Se lanza el evento onCancelled() NO DEBERIA ENTRAR AQUÍ SI DESCARGA BIEN DEL SERVER. Se muestra la bbdd local");
+                        Log.d("GET_INTENT", "Se lanza el evento onCancelled(). Se muestra la bbdd local");
                         showLocalDatabase();
                     }
                 });
@@ -298,27 +301,25 @@ public class BookListActivity extends AppCompatActivity {
     private void sincronizeDatabases(){
 
         int serverSize = 0;
-
         // Calculates how many books are in the server.
-        // If there are books to download
         if (mBooksFromServer != null) {
             for (BookContent.BookItem book : mBooksFromServer) {
                 // When a book in the server is deleted, it remains at its position as null.
                 // But we don't want to count null books.
                 if (book != null) {
-                    // If a bookFromServer is not null, adds to serverSize.
+                    // If a bookFromServer is not null, increments serverSize.
                     serverSize++;
-
                 }
             }
         }
+        // Calculates how many books are in the local database.
         List<BookContent.BookItem> booksFromLocalDatabase = BookContent.getBooks();
         int databaseSize = booksFromLocalDatabase.size();
 
-        // We need to add books to de local database
+        // if serverSize > databaseSize, we need to add books to the local database.
         if (serverSize > databaseSize) {
             Log.d("GET_INTENT", "serverSize > databaseSize");
-            // If there are books to download
+            // If there are any books to download
             if (mBooksFromServer != null) {
                 for (BookContent.BookItem book : mBooksFromServer) {
                     // When a book in the server is deleted, it remains at its position as null.
@@ -333,7 +334,7 @@ public class BookListActivity extends AppCompatActivity {
             }
         }
 
-        // We need to remove books from the local database
+        // If serverZize < databaseSize, we need to remove books from the local database
         if (serverSize < databaseSize) {
             Log.d("GET_INTENT", "serverSize < databaseSize");
             // If there are books to download
@@ -384,6 +385,7 @@ public class BookListActivity extends AppCompatActivity {
                 Log.d("GET_INTENT","onRefresh()");
                 BookContent.BookItem.deleteAll(BookContent.BookItem.class);
                 Log.d("GET_INTENT","Local database deleted");
+                // removes the listener because another one is going to be created in downloadBooks().
                 removeValueEventListenerFromFirebase();
                 signin();
                 swipeContainer.setRefreshing(false);
@@ -395,7 +397,6 @@ public class BookListActivity extends AppCompatActivity {
         Log.d("GET_INTENT", "METHOD: removeValueEventListenerFromFirebase()");
         if(listener != null) {
             dbRef.removeEventListener(listener);
-
             Log.d("GET_INTENT","valueEventListener removed: " + listener.hashCode());
             listener = null;
         }

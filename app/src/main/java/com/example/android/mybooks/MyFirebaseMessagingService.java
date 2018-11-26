@@ -4,6 +4,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
@@ -71,7 +72,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             intent2.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);// Clear back history
             intent2.setAction(ACTION_VIEW_DETAILS);
             intent2.putExtra(BOOK_ID, bookID);// Extra with the position of the book we want to view details
-            // Pending intent that will be launched when the user taps the 'view details' button. Note the use
+            // Pending intent that will be launched when the user taps the 'view details' button.
             // Note the use of FLAG_UPDATE_CURRENT for keeping the PendingIntent (if already exists) but replacing
             // its extra data with what is in this new intent.
             PendingIntent viewDetailsIntent = PendingIntent.getActivity(this, 5566, intent2, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -79,9 +80,11 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
             // Creates the expanded notification with two buttons
             NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, getString(R.string.default_notification_channel_id))
-                    .setSmallIcon(R.drawable.ic_notification)
+                    .setSmallIcon(R.drawable.ic_book)
                     .setContentTitle(getString(R.string.notification_content_title))
                     .setContentText(messageBody)
+                    .setVibrate(new long[]{1000,1000,1000,1000,1000})
+                    .setLights(Color.BLUE,3000,3000)
                     .setStyle(new NotificationCompat.BigTextStyle().bigText(messageBody))
                     .setAutoCancel(true)//TODO: no funciona setAutoCancel(true)
                     .setSound(defaultSoundUri)
