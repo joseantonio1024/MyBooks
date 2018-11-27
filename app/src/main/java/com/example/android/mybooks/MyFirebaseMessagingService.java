@@ -80,11 +80,11 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
             // Creates the expanded notification with two buttons
             NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, getString(R.string.default_notification_channel_id))
-                    .setSmallIcon(R.drawable.ic_book)
+                    .setSmallIcon(R.drawable.ic_book) // Set the notification icon. Now it's a book.
                     .setContentTitle(getString(R.string.notification_content_title))
                     .setContentText(messageBody)
-                    .setVibrate(new long[]{1000,1000,1000,1000,1000})
-                    .setLights(Color.BLUE,3000,3000)
+                    .setVibrate(new long[]{1000,1000,1000,1000,1000}) // Sets the vibration.
+                    .setLights(Color.BLUE,3000,3000) // Sets the notification light in blue.
                     .setStyle(new NotificationCompat.BigTextStyle().bigText(messageBody))
                     .setAutoCancel(true)//TODO: no funciona setAutoCancel(true)
                     .setSound(defaultSoundUri)
