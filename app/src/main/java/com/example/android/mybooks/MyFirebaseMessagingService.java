@@ -64,7 +64,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             intent1.setAction(ACTION_DELETE_BOOK);
             intent1.putExtra(BOOK_ID, bookID);// Extra with the position of the book we want to delete
             // Pendind intent that will be launched when the user taps the 'delete' button.
-
             PendingIntent deleteIntent = PendingIntent.getActivity(this, 1122, intent1, PendingIntent.FLAG_UPDATE_CURRENT);
 
             // Intent to pass 'view details' action to BookListActivity
@@ -86,7 +85,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     .setVibrate(new long[]{1000,1000,1000,1000,1000}) // Sets the vibration.
                     .setLights(Color.BLUE,3000,3000) // Sets the notification light in blue.
                     .setStyle(new NotificationCompat.BigTextStyle().bigText(messageBody))
-                    .setAutoCancel(true)//TODO: no funciona setAutoCancel(true)
+                    .setAutoCancel(true)
                     .setSound(defaultSoundUri)
                     .addAction(R.drawable.ic_delete, getString(R.string.notification_button_delete), deleteIntent)
                     .addAction(R.drawable.ic_view_details, getString(R.string.notification_button_viewDetails), viewDetailsIntent);

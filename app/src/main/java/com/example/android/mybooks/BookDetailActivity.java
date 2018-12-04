@@ -16,6 +16,7 @@ import android.view.MenuItem;
  * book details are presented side-by-side with a list of books in a {@link BookListActivity}.
  */
 public class BookDetailActivity extends AppCompatActivity {
+    private static String _DEBUG_ = "_DEBUG_";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,7 +25,7 @@ public class BookDetailActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.detail_toolbar);
         setSupportActionBar(toolbar);
 
-        Log.d("GET_INTENT", "BookDetailActivity: method: onCreate()");
+        Log.d(_DEBUG_, "BookDetailActivity: method: onCreate()");
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {

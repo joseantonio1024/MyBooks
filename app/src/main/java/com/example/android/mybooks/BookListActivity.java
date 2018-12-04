@@ -1,14 +1,29 @@
 package com.example.android.mybooks;
 
 import com.example.android.mybooks.model.BookContent;
+
+import android.app.Dialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.ContextWrapper;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.NonNull;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.content.FileProvider;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -31,6 +46,11 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import com.facebook.stetho.Stetho;
@@ -46,6 +66,7 @@ import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import static com.example.android.mybooks.MyFirebaseMessagingService.ACTION_DELETE_BOOK;
 import static com.example.android.mybooks.MyFirebaseMessagingService.ACTION_VIEW_DETAILS;
 import static com.example.android.mybooks.MyFirebaseMessagingService.BOOK_ID;
+
 
 /**
  * An activity representing a list of Books. This activity has different presentations for handset and tablet-size devices.
@@ -132,6 +153,7 @@ public class BookListActivity extends AppCompatActivity {
     // Creates a navigation drawer with a header and a list of items.
     private void createDrawer(){
         Log.d(_DEBUG_,"Method: createDrawer()");
+
         // Creates the AccountHeader
         AccountHeader headerResult = new AccountHeaderBuilder()
                 .withActivity(this)
@@ -145,13 +167,11 @@ public class BookListActivity extends AppCompatActivity {
                 })
                 .build();
 
-
-        //if you want to update the items at a later time it is recommended to keep it in a variable
+        //If you want to update the items at a later time it is recommended to keep it in a variable
         PrimaryDrawerItem item1 = new PrimaryDrawerItem().withIdentifier(1).withName("Share with other apps");
         PrimaryDrawerItem item2 = new PrimaryDrawerItem().withIdentifier(2).withName("Copy to clipboard");
-        PrimaryDrawerItem item3 = new PrimaryDrawerItem().withIdentifier(3).withName("Share with Whatsapp");
-
-        //creates the drawer and remember the `Drawer` result object
+        PrimaryDrawerItem item3 = new PrimaryDrawerItem().withIdentifier(3).withName("About");
+        //Creates the drawer and remember the `Drawer` result object
         Drawer result = new DrawerBuilder()
                 .withAccountHeader(headerResult)
                 .withActivity(this)
@@ -160,7 +180,59 @@ public class BookListActivity extends AppCompatActivity {
                 .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                     @Override
                     public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                        // do something with the clicked item :D
+                        //Checks if the drawerItem is set. There are different reasons for the drawerItem to be null
+                        //--> click on the header
+                        //--> click on the footer
+                        //Those items don't contain a drawerItem
+
+                        if (drawerItem != null) {
+                            String textMessage = "This is an android app to share books";
+
+                            switch ((int)drawerItem.getIdentifier()){
+                                case 1:
+                                    Intent shareIntent;
+                                    Log.d(_DEBUG_,"Intent: 1");
+                                    Uri imageToShare = prepareImage();
+                                    shareIntent = new Intent();
+                                    shareIntent.setAction(Intent.ACTION_SEND);
+                                    shareIntent.putExtra(Intent.EXTRA_TEXT, textMessage);
+                                    shareIntent.putExtra(Intent.EXTRA_STREAM, imageToShare);
+                                    shareIntent.setType("image/*");
+                                    shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                    startActivity(Intent.createChooser(shareIntent, "Share with other apps"));
+                                    break;
+                                case 2:
+                                    // Get clipboard manager object.
+                                    Object clipboardService = getSystemService(CLIPBOARD_SERVICE);
+                                    final ClipboardManager clipboardManager = (ClipboardManager)clipboardService;
+                                    // Create a new ClipData.
+                                    ClipData clipData = ClipData.newPlainText("Source Text", textMessage);
+                                    // Set it as primary clip data to copy text to system clipboard.
+                                    clipboardManager.setPrimaryClip(clipData);
+                                    // Popup a snackbar.
+                                    Toast.makeText(getApplicationContext(), "Source text has been copied to system clipboard.", Snackbar.LENGTH_LONG).show();
+                                    break;
+                                case 3:
+
+                                    AlertDialog alertDialog = new AlertDialog.Builder(BookListActivity.this)
+                                            //set icon
+                                            .setIcon(android.R.drawable.ic_dialog_info)
+                                            //set title
+                                            .setTitle("About")
+                                            //set message
+                                            .setMessage("Developed by Jose Antonio Feijoo Suarez")
+                                            //set positive button
+                                            .setNeutralButton("OK", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialogInterface, int i) {
+                                                    //set what would happen when positive button is clicked
+                                                    //finish();
+                                                }
+                                            })
+                                            .show();
+                                    break;
+                            }
+                        }
                         return false;
                     }
                 })
@@ -198,6 +270,9 @@ public class BookListActivity extends AppCompatActivity {
     private void getNotificationActionButtons(){
         Log.d(_DEBUG_, "METHOD: getNotificationActionButtons()");
         if (getIntent() != null && getIntent().getAction() != null) {
+
+            NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            notificationManager.cancelAll();
 
             // Retrieves the action within the intent.
             String action = getIntent().getAction();
@@ -274,7 +349,7 @@ public class BookListActivity extends AppCompatActivity {
     }
 
     private void initRecyclerView(){
-        Log.d("GET_INTENT", "METHOD: initRecyclerView()");
+        Log.d(_DEBUG_, "METHOD: initRecyclerView()");
         View recyclerView = findViewById(R.id.book_list);
         assert recyclerView != null;
         // Adds LayoutManager here instead of book_list.xml
@@ -446,7 +521,6 @@ public class BookListActivity extends AppCompatActivity {
     }
 
     private void removeValueEventListenerFromFirebase() {
-        Log.d(_DEBUG_, "METHOD: removeValueEventListenerFromFirebase()");
         if(listener != null) {
             dbRef.removeEventListener(listener);
             Log.d(_DEBUG_,"valueEventListener removed: " + listener.hashCode());
@@ -454,6 +528,44 @@ public class BookListActivity extends AppCompatActivity {
         }
     }
 
+    // Helper method to get a bitmap from resources, save it to a temp folder and return
+    // a content uri with its path with a FileProvider in order to allow sharing the image.
+    private Uri prepareImage() {
+
+        Drawable drawable = getResources().getDrawable(R.mipmap.ic_launcher);
+        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+
+        File imagePath = new File(getFilesDir(), "temporal");
+        boolean algo = imagePath.mkdir();
+        File imageFile = new File(imagePath.getPath(), "app_icon.png");
+
+        try {
+            FileOutputStream fos = new FileOutputStream(imageFile);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            fos.flush();
+            fos.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        String authority = getPackageName();
+        Context ctx = getApplicationContext();
+
+        Uri contentUri = null;
+        try {
+            contentUri = FileProvider.getUriForFile(ctx, authority, imageFile);
+            Log.d(_DEBUG_,"ContentUri: " + contentUri.toString());
+        }catch(Exception e){
+            Log.d(_DEBUG_, "exception: " + e.getMessage());
+        }finally {
+            Log.d(_DEBUG_,"retorna: uri");
+            return contentUri;
+        }
+
+    }
 
 
 
