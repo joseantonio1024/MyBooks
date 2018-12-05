@@ -1,22 +1,41 @@
 <resources>
-    <string name="app_name">My books</string>
-    <string name="title_book_detail">Book details</string>
-    <string name="book_cover">Book cover</string>
-    <string name="auth_failed">Authentication failed</string>
-    <string name="user_register_successfully">User registered successfully</string>
-    <string name="error_downloading_data">Error downloading data!</string>
-    <string name="user_is_not_signedin">User is not signed in</string>
-    <string name="downloading_books">Downloading books</string>
-    <string name="no_books_in_ddbb">There are no books in the local database</string>
+    <string name="app_name" translatable="false">My books</string>
+    <string name="title_book_detail" translatable="true">Book details</string>
+    <string name="book_cover" translatable="true">Book cover</string>
+    <string name="toast_auth_failed" translatable="true">Authentication failed</string>
+    <string name="toast_user_register_successfully" translatable="true">User registered successfully</string>
+    <string name="toast_error_downloading_data" translatable="true">Error downloading data!</string>
+    <string name="user_is_not_signedin" translatable="true">User is not signed in</string>
+    <string name="toast_downloading_books" translatable="true">Downloading books</string>
+    <string name="toast_no_books_in_database" translatable="true">There are no books in the local database</string>
 
     <string name="default_notification_channel_id" translatable="false">fcm default channel</string>
-
     <!-- This is the name that users will see when interacting with this channel.
     It should describe the category of notifications that will be sent through this channel -->
     <string name="default_notification_channel_name" translatable="true">Updates</string>
+
     <string name="notification_button_delete" translatable="true">delete</string>
     <string name="notification_button_viewDetails" translatable="true">view details</string>
     <string name="notification_content_title" translatable="false">Firebase</string>
     <string name="new_token" translatable="true">New token:</string>
+
+    <string name="profile_name" translatable="false">Jose Antonio</string>
+    <string name="profile_email" translatable="false">jose@email.es</string>
+    <string name="drawer_item1" translatable="true">Share with other apps</string>
+    <string name="drawer_item2" translatable="true">Copy to clipboard</string>
+    <string name="drawer_item3" translatable="true">About</string>
+    <string name="message_to_share" translatable="true">This is an android app to share books</string>
+    <string name="chooser_title" translatable="true">Share with other apps</string>
+    <string name="toast_message_text_copied_to_clipboard" translatable="true">Source text has been copied to system clipboard.</string>
+    <string name="dialog_title" translatable="true">About</string>
+    <string name="dialog_message1" translatable="true">Developed by</string>
+    <string name="dialog_message2" translatable="false">Jose Antonio Feijoo Suarez</string>
+    <string name="dialog_button_ok" translatable="true">OK</string>
+    <string name="toast_message_sign_out_long_clicked" translatable="true">signs out if long clicked</string>
+    <string name="snackbar_message_signed_out" translatable="true">signed out</string>
+    <string name="toast_message_book_deleted" translatable="true">book deleted</string>
+    <string name="toast_message_book_not_exist_database" translatable="true">Error. This book does not exist in the local database</string>
+    <string name="toast_message_book_not_exist_server" translatable="true">Error. This book does not exist in the server</string>
+    <string name="toast_message_index_out_of_range" translatable="true">Error. Index out of range</string>
 
 </resources>

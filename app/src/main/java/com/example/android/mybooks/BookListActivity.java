@@ -1,26 +1,20 @@
 package com.example.android.mybooks;
 
 import com.example.android.mybooks.model.BookContent;
-
-import android.app.Dialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.content.FileProvider;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
@@ -49,8 +43,6 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import com.facebook.stetho.Stetho;
@@ -97,8 +89,8 @@ public class BookListActivity extends AppCompatActivity {
     // An object with the current user.
     private FirebaseAuth mAuth;
 
+    // The action bar.
     private Toolbar toolbar;
-
 
 
     @Override
@@ -118,14 +110,13 @@ public class BookListActivity extends AppCompatActivity {
         initRecyclerView();
         signin();
         registerSwipeRefreshLayout();
-
     }//End onCreate()
 
     @Override
+    // Removes the listener in order to save resources.
     protected void onDestroy() {
         super.onDestroy();
         Log.d(_DEBUG_,"onDestroy()");
-        // Removes the listener in order to save resources.
         removeValueEventListenerFromFirebase();
     }
 
@@ -143,6 +134,7 @@ public class BookListActivity extends AppCompatActivity {
         }
     }
 
+    // Initializes the action bar
     private void initToolbar(){
         Log.d(_DEBUG_, "METHOD: initToolbar()");
         toolbar = findViewById(R.id.toolbar);
@@ -158,7 +150,7 @@ public class BookListActivity extends AppCompatActivity {
         AccountHeader headerResult = new AccountHeaderBuilder()
                 .withActivity(this)
                 .withHeaderBackground(R.drawable.header)
-                .addProfiles(new ProfileDrawerItem().withName("Jose Antonio").withEmail("jose@email.es").withIcon(R.drawable.profile))
+                .addProfiles(new ProfileDrawerItem().withName(R.string.profile_name).withEmail(R.string.profile_email).withIcon(R.drawable.profile))
                 .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
                     @Override
                     public boolean onProfileChanged(View view, IProfile profile, boolean currentProfile) {
@@ -168,9 +160,9 @@ public class BookListActivity extends AppCompatActivity {
                 .build();
 
         //If you want to update the items at a later time it is recommended to keep it in a variable
-        PrimaryDrawerItem item1 = new PrimaryDrawerItem().withIdentifier(1).withName("Share with other apps");
-        PrimaryDrawerItem item2 = new PrimaryDrawerItem().withIdentifier(2).withName("Copy to clipboard");
-        PrimaryDrawerItem item3 = new PrimaryDrawerItem().withIdentifier(3).withName("About");
+        PrimaryDrawerItem item1 = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.drawer_item1);
+        PrimaryDrawerItem item2 = new PrimaryDrawerItem().withIdentifier(2).withName(R.string.drawer_item2);
+        PrimaryDrawerItem item3 = new PrimaryDrawerItem().withIdentifier(3).withName(R.string.drawer_item3);
         //Creates the drawer and remember the `Drawer` result object
         Drawer result = new DrawerBuilder()
                 .withAccountHeader(headerResult)
@@ -186,10 +178,11 @@ public class BookListActivity extends AppCompatActivity {
                         //Those items don't contain a drawerItem
 
                         if (drawerItem != null) {
-                            String textMessage = "This is an android app to share books";
+                            String textMessage = getString(R.string.message_to_share);
 
                             switch ((int)drawerItem.getIdentifier()){
                                 case 1:
+                                    // Shares an image and a text with others
                                     Intent shareIntent;
                                     Log.d(_DEBUG_,"Intent: 1");
                                     Uri imageToShare = prepareImage();
@@ -199,74 +192,70 @@ public class BookListActivity extends AppCompatActivity {
                                     shareIntent.putExtra(Intent.EXTRA_STREAM, imageToShare);
                                     shareIntent.setType("image/*");
                                     shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                                    startActivity(Intent.createChooser(shareIntent, "Share with other apps"));
+                                    startActivity(Intent.createChooser(shareIntent, getString(R.string.chooser_title)));
                                     break;
                                 case 2:
-                                    // Get clipboard manager object.
+                                    // Gets clipboard manager object.
                                     Object clipboardService = getSystemService(CLIPBOARD_SERVICE);
                                     final ClipboardManager clipboardManager = (ClipboardManager)clipboardService;
                                     // Create a new ClipData.
                                     ClipData clipData = ClipData.newPlainText("Source Text", textMessage);
                                     // Set it as primary clip data to copy text to system clipboard.
                                     clipboardManager.setPrimaryClip(clipData);
-                                    // Popup a snackbar.
-                                    Toast.makeText(getApplicationContext(), "Source text has been copied to system clipboard.", Snackbar.LENGTH_LONG).show();
+                                    // Popup a toast.
+                                    Toast.makeText(getApplicationContext(), getString(R.string.toast_message_text_copied_to_clipboard), Toast.LENGTH_LONG).show();
                                     break;
                                 case 3:
-
+                                    // Creates an alert dialog with the about message
                                     AlertDialog alertDialog = new AlertDialog.Builder(BookListActivity.this)
                                             //set icon
                                             .setIcon(android.R.drawable.ic_dialog_info)
                                             //set title
-                                            .setTitle("About")
+                                            .setTitle(R.string.dialog_title)
                                             //set message
-                                            .setMessage("Developed by Jose Antonio Feijoo Suarez")
+                                            .setMessage(getString(R.string.dialog_message1) + getString(R.string.dialog_message2))
                                             //set positive button
-                                            .setNeutralButton("OK", new DialogInterface.OnClickListener() {
+                                            .setNeutralButton(R.string.dialog_button_ok, new DialogInterface.OnClickListener() {
                                                 @Override
                                                 public void onClick(DialogInterface dialogInterface, int i) {
-                                                    //set what would happen when positive button is clicked
-                                                    //finish();
+                                                    //dismiss the dialog
                                                 }
-                                            })
-                                            .show();
+                                            }).show();
                                     break;
                             }
                         }
                         return false;
                     }
-                })
-                .build();
+                }).build();
     }
 
-    // We use this button to sign out in order to test the app.
+    // This button is used to sign out in order to test sign in feature.
     private void initFab(){
         Log.d(_DEBUG_, "METHOD: initFab()");
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TODO: remove this in the production app.
-                Toast.makeText(BookListActivity.this, "signs out if long clicked", Toast.LENGTH_LONG).show();
+                Toast.makeText(BookListActivity.this, getString(R.string.toast_message_sign_out_long_clicked), Toast.LENGTH_LONG).show();
             }
         });
         fab.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                //TODO: remove this in the production app.
                 mAuth.signOut();
-                Snackbar.make(view, "signed out", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                Snackbar.make(view, R.string.snackbar_message_signed_out, Snackbar.LENGTH_LONG).setAction("Action", null).show();
                 return false;
             }
         });
     }
 
+    // whether the app is in two pane mode
     private void isTwoPane(){
         Log.d(_DEBUG_, "METHOD: isTwoPane()");
         mTwoPane = findViewById(R.id.book_detail_container) != null;
     }
 
-    // Here we get which button has been tapped in the notification
+    // Here it gets which button has been tapped in the notification
     private void getNotificationActionButtons(){
         Log.d(_DEBUG_, "METHOD: getNotificationActionButtons()");
         if (getIntent() != null && getIntent().getAction() != null) {
@@ -305,7 +294,7 @@ public class BookListActivity extends AppCompatActivity {
                                     bookToDeleteOrViewDetails.delete();// Deletes the book from the local database.
                                     deleteBookFromServer(bookID);// Deletes the book from the server.
                                     Log.d(_DEBUG_, "delete book: " + bookToDeleteOrViewDetails.getTitle());
-                                    Toast.makeText(this, "book deleted", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(this, getString(R.string.toast_message_book_deleted), Toast.LENGTH_SHORT).show();
                                 }
                                 // If the button clicked in the notification was 'VIEW DETAILS'
                                 else if (action.equalsIgnoreCase(ACTION_VIEW_DETAILS)) {
@@ -327,15 +316,15 @@ public class BookListActivity extends AppCompatActivity {
                                 }
                             }else {
                                 Log.d(_DEBUG_, "Error. El libro indicado no existe en la bbdd");
-                                Toast.makeText(this, "error. El libro indicado no existe en la bbdd", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(this, getString(R.string.toast_message_book_not_exist_database), Toast.LENGTH_SHORT).show();
                             }
                         }else {
                             Log.d(_DEBUG_, "Error. El libro indicado no existe en el server");
-                            Toast.makeText(this, "error. El libro indicado no existe en el server", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, getString(R.string.toast_message_book_not_exist_server), Toast.LENGTH_SHORT).show();
                         }
                     }else {
                         Log.d(_DEBUG_, "Error. index out of range");
-                        Toast.makeText(this, "error. index out of range", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, getString(R.string.toast_message_index_out_of_range), Toast.LENGTH_SHORT).show();
                     }
                 }catch(NumberFormatException e){
                     Log.d(_DEBUG_, e.getMessage());
@@ -348,6 +337,7 @@ public class BookListActivity extends AppCompatActivity {
         }
     }
 
+    // Initializes the recyclerViewAdapter
     private void initRecyclerView(){
         Log.d(_DEBUG_, "METHOD: initRecyclerView()");
         View recyclerView = findViewById(R.id.book_list);
@@ -360,6 +350,7 @@ public class BookListActivity extends AppCompatActivity {
         ((RecyclerView) recyclerView).setAdapter(mAdapter);
     }
 
+    // Signs in if the user is not signed in and downloads books from server.
     private void signin() {
         Log.d(_DEBUG_, "METHOD: signin()");
         String email = "jose@email.es";
@@ -373,19 +364,38 @@ public class BookListActivity extends AppCompatActivity {
                 public void onComplete(@NonNull Task<AuthResult> task) {
                     // If user is signed in, tries to download data from server.
                     if (task.isSuccessful()) {
-                        Toast.makeText(BookListActivity.this, getString(R.string.user_register_successfully), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(BookListActivity.this, getString(R.string.toast_user_register_successfully), Toast.LENGTH_SHORT).show();
                         Log.d(_DEBUG_, "registro: correcto");
                         downloadBooks();
-                    } else {// Otherwise, shows data from local database.
-                        Toast.makeText(BookListActivity.this, getString(R.string.auth_failed), Toast.LENGTH_SHORT).show();
+                    } else {// Otherwise, shows error message
+                        Toast.makeText(BookListActivity.this, getString(R.string.toast_auth_failed), Toast.LENGTH_SHORT).show();
                         Log.d(_DEBUG_, "registro: error");
                     }
                 }
             });
         }else{
             Log.d(_DEBUG_, "User is already registered: " + mAuth.getCurrentUser().getEmail());
+            // If user is signed in, downloads books from server
             downloadBooks();
         }
+    }
+
+    // Refreshes the screen when the user swipes down.
+    private void registerSwipeRefreshLayout(){
+        Log.d(_DEBUG_, "METHOD: registerSwipeRefreshLayout()");
+        final SwipeRefreshLayout swipeContainer = findViewById(R.id.swipe_container);
+        swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener(){
+            @Override
+            public void onRefresh() {
+                Log.d(_DEBUG_,"onRefresh()");
+                BookContent.BookItem.deleteAll(BookContent.BookItem.class);
+                Log.d(_DEBUG_,"Local database deleted");
+                // Removes the listener because another one is going to be created in downloadBooks().
+                removeValueEventListenerFromFirebase();
+                signin();
+                swipeContainer.setRefreshing(false);
+            }
+        });
     }
 
     // If user is registered, adds a valueEventListener and downloads the books from the server.
@@ -402,7 +412,7 @@ public class BookListActivity extends AppCompatActivity {
                         Log.d(_DEBUG_, "se lanza el event onDataChange()");
                         // Gets the books from the server as an array of types BookItem.
                         GenericTypeIndicator<ArrayList<BookContent.BookItem>> t = new GenericTypeIndicator<ArrayList<BookContent.BookItem>>() {};
-                        Toast.makeText(BookListActivity.this, getString(R.string.downloading_books), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(BookListActivity.this, getString(R.string.toast_downloading_books), Toast.LENGTH_SHORT).show();
                         // mBooksFromServer holds the list of books from the server
                         // We made it static because we need its value in the method getNotificationActionButtons() which is called
                         // in a new instance of BooklistActivity.
@@ -413,7 +423,7 @@ public class BookListActivity extends AppCompatActivity {
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError databaseError) {
-                        Toast.makeText(BookListActivity.this, getString(R.string.error_downloading_data), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(BookListActivity.this, getString(R.string.toast_error_downloading_data), Toast.LENGTH_SHORT).show();
                         // If there is any issue with the server, shows the local database instead.
                         Log.d(_DEBUG_, "Se lanza el evento onCancelled(). Se muestra la bbdd local");
                         showLocalDatabase();
@@ -424,7 +434,7 @@ public class BookListActivity extends AppCompatActivity {
         }
     }
 
-    // Synchronize the server with the local database.
+    // Synchronizes the server with the local database.
     private void synchronizeDatabases(){
         Log.d(_DEBUG_,"METHOD: synchronizeDatabases()");
         int serverSize = 0;
@@ -442,8 +452,9 @@ public class BookListActivity extends AppCompatActivity {
         // Calculates how many books are in the local database.
         List<BookContent.BookItem> booksFromLocalDatabase = BookContent.getBooks();
         int databaseSize = booksFromLocalDatabase.size();
+        Log.d(_DEBUG_,"serverSize: " + serverSize + " databaseSize: " + databaseSize);
 
-        // if serverSize > databaseSize, we need to add books to the local database.
+        // If serverSize > databaseSize, we need to add books to the local database.
         if (serverSize > databaseSize) {
             Log.d(_DEBUG_, "serverSize > databaseSize");
             // If there are any books to download
@@ -452,7 +463,7 @@ public class BookListActivity extends AppCompatActivity {
                     // When a book in the server is deleted, it remains at its position as null.
                     // But we don't want to store null books in the local database.
                     if (book != null) {
-                        // If a bookFromServer does not exist in the local database, adds to it.
+                        // If a bookFromServer does not exist in the local database, adds to the local database.
                         if (!BookContent.exists(book)) {
                             book.save();
                         }
@@ -466,6 +477,8 @@ public class BookListActivity extends AppCompatActivity {
             Log.d(_DEBUG_, "serverSize < databaseSize");
             // If there are books to download
             if (mBooksFromServer != null) {
+                // It compares all the books in the local database with all the books in the server.
+                // If a particular book in the local database does not exist in the server, deletes it.
                 for (BookContent.BookItem bookFromLocalDatabase : booksFromLocalDatabase) {
                     if (!BookContent.existsInServer(bookFromLocalDatabase, mBooksFromServer)) {
                         bookFromLocalDatabase.delete();
@@ -476,12 +489,12 @@ public class BookListActivity extends AppCompatActivity {
         showLocalDatabase();
     }
 
+    // Helper method to delete a particular book from the server
     private void deleteBookFromServer(String id){
         Log.d(_DEBUG_, "METHOD: deleteBookFromServer()");
-        DatabaseReference dbBook = FirebaseDatabase.getInstance().getReference(BookContent.FIREBASE_BOOKS_REFERENCE).child(id);
-        Log.d(_DEBUG_,"deleted book: " + dbBook.toString());
-        dbBook.removeValue();
-
+        DatabaseReference bookFromServer = FirebaseDatabase.getInstance().getReference(BookContent.FIREBASE_BOOKS_REFERENCE).child(id);
+        Log.d(_DEBUG_,"deleted book: " + bookFromServer.toString());
+        bookFromServer.removeValue();
     }
 
     // Shows books from local database.
@@ -489,8 +502,10 @@ public class BookListActivity extends AppCompatActivity {
         Log.d(_DEBUG_, "METHOD: showLocalDatabase()");
         List<BookContent.BookItem> booksFromLocalDatabase = BookContent.getBooks();
         if (!booksFromLocalDatabase.isEmpty()) {// If database is not empty, shows it.
+            // Clears ITEMS and ITEM_MAP in order to fill them again.
             BookContent.ITEMS.clear();
             BookContent.ITEM_MAP.clear();
+            // Fills ITEMS and ITEM_MAP with books from local database
             for (BookContent.BookItem book : booksFromLocalDatabase) {
                 BookContent.ITEMS.add(book);
                 BookContent.ITEM_MAP.put(book.getTitle(), book);
@@ -498,28 +513,11 @@ public class BookListActivity extends AppCompatActivity {
             // Sets the adapter with the books from the local database.
             mAdapter.setItems(BookContent.ITEMS);
         }else{
-            Toast.makeText(this, getString(R.string.no_books_in_ddbb), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.toast_no_books_in_database), Toast.LENGTH_SHORT).show();
         }
     }
 
-    // Refreshes the screen when the user swipes down.
-    private void registerSwipeRefreshLayout(){
-        Log.d(_DEBUG_, "METHOD: registerSwipeRefreshLayout()");
-        final SwipeRefreshLayout swipeContainer = findViewById(R.id.swipe_container);
-        swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener(){
-            @Override
-            public void onRefresh() {
-                Log.d(_DEBUG_,"onRefresh()");
-                BookContent.BookItem.deleteAll(BookContent.BookItem.class);
-                Log.d(_DEBUG_,"Local database deleted");
-                // removes the listener because another one is going to be created in downloadBooks().
-                removeValueEventListenerFromFirebase();
-                signin();
-                swipeContainer.setRefreshing(false);
-            }
-        });
-    }
-
+    // Helper method to remove valueEventList from firebase when needed.
     private void removeValueEventListenerFromFirebase() {
         if(listener != null) {
             dbRef.removeEventListener(listener);
@@ -532,12 +530,14 @@ public class BookListActivity extends AppCompatActivity {
     // a content uri with its path with a FileProvider in order to allow sharing the image.
     private Uri prepareImage() {
 
+        // Gets the bitmap
         Drawable drawable = getResources().getDrawable(R.mipmap.ic_launcher);
         Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
         drawable.draw(canvas);
 
+        // Saves the bitmap to the internal storage
         File imagePath = new File(getFilesDir(), "temporal");
         boolean algo = imagePath.mkdir();
         File imageFile = new File(imagePath.getPath(), "app_icon.png");
@@ -551,23 +551,14 @@ public class BookListActivity extends AppCompatActivity {
             e.printStackTrace();
             return null;
         }
-        String authority = getPackageName();
+
+        // Prepares a content uri in order to return it.
         Context ctx = getApplicationContext();
-
-        Uri contentUri = null;
-        try {
-            contentUri = FileProvider.getUriForFile(ctx, authority, imageFile);
-            Log.d(_DEBUG_,"ContentUri: " + contentUri.toString());
-        }catch(Exception e){
-            Log.d(_DEBUG_, "exception: " + e.getMessage());
-        }finally {
-            Log.d(_DEBUG_,"retorna: uri");
-            return contentUri;
-        }
-
+        String authority = getPackageName();
+        Uri contentUri = FileProvider.getUriForFile(ctx, authority, imageFile);
+        Log.d(_DEBUG_,"ContentUri: " + contentUri.toString());
+        return contentUri;
     }
-
-
 
 
 
