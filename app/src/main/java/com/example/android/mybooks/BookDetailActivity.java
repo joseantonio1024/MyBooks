@@ -105,6 +105,5 @@ public class BookDetailActivity extends AppCompatActivity {
             finish();
             return false;
         }
-
     }
 }
