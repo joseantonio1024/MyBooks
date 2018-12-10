@@ -8,14 +8,12 @@ import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
 // service started automatically by Firebase's SDK.
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
-    private static final String TAG = "MyFirebaseMsgService";
     public static final String BOOK_ID = "com.example.android.mybooks.MyFirebaseMessagingService.book_position";
     public static final String ACTION_DELETE_BOOK = "com.example.android.mybooks.MyFirebaseMessagingService.action_delete_book";
     public static final String ACTION_VIEW_DETAILS = "com.example.android.mybooks.MyFirebaseMessagingService.action_view_details";
@@ -36,13 +34,11 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         // and data payloads are treated as notification messages. The Firebase console always sends notification
         // messages. For more see: https://firebase.google.com/docs/cloud-messaging/concept-options
         // [END_EXCLUDE]
-        Log.d(TAG, "From: " + remoteMessage.getFrom());
         sendNotification(remoteMessage);
     }
 
     @Override
     public void onNewToken(String string){
-        Log.d(TAG, getString(R.string.new_token) + string);
     }
 
     /**
@@ -56,7 +52,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         // Checks if notification contains any data payload.
         if(bookID != null) {
-            Log.d(TAG , "book position we want to delete or view details: " + bookID);
 
             // Intent to pass 'delete' action to BookListActivity
             Intent intent1 = new Intent(this, BookListActivity.class);
@@ -94,7 +89,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             // Sets notification id to zero, so all messages from firebase will group together.
             notificationManager.notify(0, notificationBuilder.build());
         }else{
-            Log.d(TAG,"Data payload error: " + bookID );
         }
     }
 }

@@ -5,7 +5,6 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +18,7 @@ import com.squareup.picasso.Picasso;
  * in two-pane mode (on tablets) or a {@link BookDetailActivity} on handsets.
  */
 public class BookDetailFragment extends Fragment {
-    private static String _DEBUG_ = "_DEBUG_";
+
     /**
      * The fragment argument representing the item ID that this fragment represents.
      */
@@ -39,7 +38,6 @@ public class BookDetailFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(_DEBUG_, "BookDetailFragment: method: onCreate()");
         if (getArguments().containsKey(ARG_ITEM_ID)) {
             // Loads the book specified by the fragment arguments.
             mItem = BookContent.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));

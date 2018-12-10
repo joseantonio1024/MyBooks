@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
@@ -20,8 +19,6 @@ import android.widget.Toast;
  * book details are presented side-by-side with a list of books in a {@link BookListActivity}.
  */
 public class BookDetailActivity extends AppCompatActivity {
-    private static String _DEBUG_ = "_DEBUG_";
-    private static String _DEBUG2_ = "_DEBUG2_";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,8 +26,6 @@ public class BookDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_book_detail);
         Toolbar toolbar = findViewById(R.id.detail_toolbar);
         setSupportActionBar(toolbar);
-
-        Log.d(_DEBUG_, "BookDetailActivity: method: onCreate()");
 
         // Shows a floating action button for buying the book
         FloatingActionButton fab = findViewById(R.id.fab);
@@ -91,8 +86,6 @@ public class BookDetailActivity extends AppCompatActivity {
             String name = Uri.parse(url).getQueryParameter("name");
             String num = Uri.parse(url).getQueryParameter("num");
             String date = Uri.parse(url).getQueryParameter("date");
-
-            Log.d(_DEBUG2_, "MyWebViewClient: method: shouldOverrideUrlLoading(): " + name + num + date);
 
             // If there is some field empty, shows a message for the user to refill them.
             if(TextUtils.isEmpty(name) || TextUtils.isEmpty(num) || TextUtils.isEmpty(date)) {
