@@ -1,16 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/book_detail"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal"
     android:padding="16dp"
     tools:context=".BookDetailFragment">
 
-    <FrameLayout
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fragment_fab"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_margin="@dimen/fab_margin"
+        app:layout_anchorGravity="right|top"
+        app:srcCompat="@android:drawable/btn_star_big_off" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
+
 
         <ImageView
             android:id="@+id/iv_imagen_libro"
@@ -19,9 +35,10 @@
             android:contentDescription="@string/book_cover"
             android:scaleType="centerCrop"
             tools:src="@drawable/portada_libro" />
-    </FrameLayout>
+    </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
@@ -49,4 +66,9 @@
             tools:text="Description.\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla a elit fringilla, lacinia sem a, lobortis est. Nunc viverra elit ac nisl finibus auctor. Duis aliquam gravida molestie." />
     </LinearLayout>
 
-</LinearLayout>
+    </LinearLayout>
+
+
+
+
+</android.support.design.widget.CoordinatorLayout>

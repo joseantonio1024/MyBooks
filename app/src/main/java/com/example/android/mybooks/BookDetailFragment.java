@@ -4,12 +4,17 @@ import android.app.Activity;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.example.android.mybooks.model.BookContent;
 import com.squareup.picasso.Picasso;
 
@@ -38,6 +43,7 @@ public class BookDetailFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d("MI_DEBUG","BookDetailFragment.onCreate()");
         if (getArguments().containsKey(ARG_ITEM_ID)) {
             // Loads the book specified by the fragment arguments.
             mItem = BookContent.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));
@@ -46,14 +52,20 @@ public class BookDetailFragment extends Fragment {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
+        final LayoutInflater inflater1 = inflater;
+        final ViewGroup container1 = container;
+
+        Log.d("MI_DEBUG","BookDetailFragment.onCreateView()");
+
         // Shows the title of the book in the toolbar.
-        Activity activity = this.getActivity();
+        final Activity activity = this.getActivity();
         CollapsingToolbarLayout appBarLayout = activity.findViewById(R.id.toolbar_layout);
         if (appBarLayout != null) {
             appBarLayout.setTitle(mItem.getTitle());
         }
 
-        View rootView = inflater.inflate(R.layout.book_detail, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_book_detail, container, false);
         // Shows book details.
         if (mItem != null) {
             ((TextView) rootView.findViewById(R.id.tv_autor)).setText(mItem.getAuthor());
@@ -62,6 +74,26 @@ public class BookDetailFragment extends Fragment {
             // Uses Picasso library to show the book image.
             Picasso.get().load(mItem.getUrl_image()).into((ImageView)rootView.findViewById(R.id.iv_imagen_libro));
         }
+
+
+
+
+            // adds a listener to the floating action button for buying the book
+            FloatingActionButton fab = rootView.findViewById(R.id.fragment_fab);
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    WebViewFragment fragment = new WebViewFragment();
+                    Log.d("MI_DEBUG","BookDetailFragment - getActivity.getLocalClassName(): " + getActivity().getLocalClassName());
+                    getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.book_detail_container, fragment).commit();
+
+
+
+                }
+            });
+
+
         return rootView;
     }
 }

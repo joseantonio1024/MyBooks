@@ -38,4 +38,7 @@
     <string name="toast_message_book_not_exist_server" translatable="true">Error. This book does not exist in the server</string>
     <string name="toast_message_index_out_of_range" translatable="true">Error. Index out of range</string>
 
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
 </resources>

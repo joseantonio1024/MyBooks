@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
@@ -24,11 +25,14 @@ public class BookDetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_book_detail);
+
+        Log.d("MI_DEBUG","BookDetailActivity.onCreate()");
+
         Toolbar toolbar = findViewById(R.id.detail_toolbar);
         setSupportActionBar(toolbar);
 
-        // Shows a floating action button for buying the book
-        FloatingActionButton fab = findViewById(R.id.fab);
+        // adds a listener to the floating action button for buying the book
+        /*FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -39,7 +43,7 @@ public class BookDetailActivity extends AppCompatActivity {
                 webView.setWebViewClient(webViewClient);
                 webView.loadUrl("file:///android_asset/form.html");
             }
-        });
+        }); */
 
         // Shows the Up button in the action bar.
         ActionBar actionBar = getSupportActionBar();
@@ -51,6 +55,7 @@ public class BookDetailActivity extends AppCompatActivity {
         // (e.g. when rotating the screen from portrait to landscape). In this case, the fragment will automatically be re-added
         // to its container so we don't need to manually add it.
         if (savedInstanceState == null) {
+            Log.d("MI_DEBUG","savedInstanceState == null. Creamos un nuevo fragment.");
             // Creates the detail fragment and adds it to the activity using a fragment transaction.
             Bundle arguments = new Bundle();
             arguments.putString(BookDetailFragment.ARG_ITEM_ID, getIntent().getStringExtra(BookDetailFragment.ARG_ITEM_ID));
@@ -76,27 +81,5 @@ public class BookDetailActivity extends AppCompatActivity {
     }
 
 
-    // Inner class to intercept form's data.
-    private class MyWebViewClient extends WebViewClient {
 
-        @Override
-        public boolean shouldOverrideUrlLoading(WebView view, String url) {
-
-            // Gets the fields in the form.
-            String name = Uri.parse(url).getQueryParameter("name");
-            String num = Uri.parse(url).getQueryParameter("num");
-            String date = Uri.parse(url).getQueryParameter("date");
-
-            // If there is some field empty, shows a message for the user to refill them.
-            if(TextUtils.isEmpty(name) || TextUtils.isEmpty(num) || TextUtils.isEmpty(date)) {
-                Toast.makeText(view.getContext(), "You have to fill all text boxes", Toast.LENGTH_LONG).show();
-                return true;
-            }
-
-            // The user has bought the book successfully. Shows a message and dismiss the webview.
-            Toast.makeText(view.getContext(), "Your purchase has been successful", Toast.LENGTH_LONG).show();
-            finish();
-            return false;
-        }
-    }
 }
